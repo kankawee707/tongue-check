@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TongueCheck AI - ระบบวิเคราะห์ลิ้นอัจฉริยะ</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Opun+Mai:wght@300;400;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --p-blue: #0056b3;
+            --d-red: #dc3545;
+            --w-yellow: #ffc107;
+            --dark: #212529;
+        }
+
+        * { font-family: 'Opun Mai', sans-serif; }
+        body { background-color: #f4f7f6; color: var(--dark); }
+
+        /* Navbar */
+        .navbar { border-bottom: 5px solid var(--w-yellow); background-color: var(--p-blue) !important; }
+        .navbar-brand img { height: 45px; border-radius: 8px; margin-right: 12px; }
+        .navbar-brand span { font-weight: 700; letter-spacing: 1px; }
+
+        /* UI Elements */
+        .card { border: none; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); overflow: hidden; }
+        .btn-round { border-radius: 50px; font-weight: 700; padding: 12px 25px; transition: 0.3s; }
+        .btn-primary { background-color: var(--p-blue); border: none; }
+        .btn-danger { background-color: var(--d-red); border: none; }
+        
+        /* Camera UI */
+        #video-container { position: relative; width: 100%; max-width: 420px; margin: auto; }
+        #video { width: 100%; border-radius: 20px; border: 8px solid white; background: #000; display: block; }
+        .guide-overlay {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 150px; height: 200px; border: 4px dashed var(--w-yellow);
+            border-radius: 50%; pointer-events: none; opacity: 0.8;
+        }
+
+        /* Table */
+        .table thead { background-color: var(--p-blue); color: white; }
+        .badge-status { font-size: 0.85rem; padding: 6px 12px; border-radius: 50px; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-dark shadow-sm">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="#">
+            <img src="https://img2.pic.in.th/tongueCheck.jpg" alt="TongueCheck Logo">
+            <span>TongueCheck AI</span>
+        </a>
+        <button id="btnLogout" class="btn btn-outline-light btn-sm btn-round d-none">ออกจากระบบ</button>
+    </div>
+</nav>
+
+<div class="container py-5">
+    
+    <div id="authSection" class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card p-5 text-center">
+                <img src="https://img2.pic.in.th/tongueCheck.jpg" alt="Logo" class="mb-4 mx-auto" style="height: 100px; border-radius: 15px;">
+                <h3 class="fw-bold mb-4" style="color: var(--p-blue);">เข้าสู่ระบบ</h3>
+                <div class="text-start">
+                    <label class="small mb-1">อีเมล</label>
+                    <input type="email" id="email" class="form-control mb-3 btn-round" placeholder="example@mail.com">
+                    <label class="small mb-1">รหัสผ่าน</label>
+                    <input type="password" id="password" class="form-control mb-4 btn-round" placeholder="••••••••">
+                </div>
+                <button id="btnLogin" class="btn btn-primary w-100 mb-2 btn-round">เข้าสู่ระบบ</button>
+                <button id="btnSignUp" class="btn btn-outline-secondary w-100 btn-round">สมัครสมาชิกใหม่</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="mainSection" class="row d-none">
+        <div class="col-lg-5 mb-4">
+            <div class="card p-4 text-center h-100">
+                <h5 class="fw-bold mb-4" style="color: var(--d-red);">📸 ตรวจสอบสุขภาพลิ้น</h5>
+                <div id="video-container">
+                    <video id="video" autoplay playsinline></video>
+                    <div class="guide-overlay"></div>
+                </div>
+                <canvas id="canvas" class="d-none" width="400" height="300"></canvas>
+                
+                <div id="statusMsg" class="mt-3 small fw-bold text-muted">จัดลิ้นให้อยู่ในกรอบสีเหลือง</div>
+                
+                <button id="btnCapture" class="btn btn-danger btn-lg mt-3 w-100 btn-round shadow">
+                    กดเพื่อวิเคราะห์ผล
+                </button>
+                
+                <div id="resultArea" class="mt-4"></div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="card p-4 h-100">
+                <h5 class="fw-bold mb-4" style="color: var(--p-blue);">⏳ ประวัติการวิเคราะห์</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>วัน-เวลา</th>
+                                <th>ผลการตรวจ</th>
+                                <th>สี (RGB)</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyBody">
+                            <tr><td colspan="4" class="text-center py-4">กำลังโหลดข้อมูล...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
+    import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-database.js";
+
+    // ข้อมูล Firebase ของคุณ
+    const firebaseConfig = {
+        apiKey: "AIzaSyAT_a_mJqgA4BpJAHsdnFG8DbitAWUoLko",
+        authDomain: "tonguecheck.firebaseapp.com",
+        databaseURL: "https://tonguecheck-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "tonguecheck",
+        storageBucket: "tonguecheck.firebasestorage.app",
+        messagingSenderId: "278288057340",
+        appId: "1:278288057340:web:dcc14f73fa8806c0176879"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const historyBody = document.getElementById('historyBody');
+
+    // --- 1. จัดการกล้อง ---
+    async function startCamera() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+            video.srcObject = stream;
+        } catch (err) {
+            alert("ไม่สามารถเข้าถึงกล้องได้: " + err.message);
+        }
+    }
+
+    // --- 2. การวิเคราะห์ภาพ (Core Logic) ---
+    function analyzeImage() {
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+
+        let rSum = 0, gSum = 0, bSum = 0, count = 0;
+
+        // ดึงค่าสีเฉพาะบริเวณกึ่งกลางภาพ (ตำแหน่งลิ้น)
+        for (let i = 0; i < imgData.length; i += 4) {
+            let r = imgData[i], g = imgData[i+1], b = imgData[i+2];
+            // ตรวจจับพิกเซลที่มีโทนสีแดง/ชมพู
+            if (r > 100 && r > g) {
+                rSum += r; gSum += g; bSum += b; count++;
+            }
+        }
+
+        if (count < 800) return { error: "หาลิ้นไม่พบ! กรุณาวางลิ้นให้ตรงกรอบ" };
+
+        const avgR = Math.floor(rSum / count);
+        const avgG = Math.floor(gSum / count);
+        const avgB = Math.floor(bSum / count);
+
+        // วิเคราะห์ความเสี่ยง (Rule-based)
+        let result = "สุขภาพปกติ";
+        let statusColor = "success";
+
+        if (avgG > 170 && avgR > 180) { result = "พบฝ้าขาวสะสม"; statusColor = "warning"; }
+        else if (avgR > 220 && avgG < 110) { result = "ลิ้นแดงผิดปกติ (อักเสบ)"; statusColor = "danger"; }
+        else if (avgR < 140) { result = "ลิ้นซีด (เสี่ยงโลหิตจาง)"; statusColor = "info"; }
+
+        return { result, rgb: `${avgR},${avgG},${avgB}`, statusColor };
+    }
+
+    // --- 3. บันทึกข้อมูลลง Firebase ---
+    document.getElementById('btnCapture').onclick = () => {
+        const analysis = analyzeImage();
+        if (analysis.error) {
+            document.getElementById('statusMsg').innerText = analysis.error;
+            document.getElementById('statusMsg').classList.add('text-danger');
+            return;
+        }
+
+        document.getElementById('statusMsg').innerText = "วิเคราะห์สำเร็จ!";
+        document.getElementById('statusMsg').classList.replace('text-danger', 'text-success');
+
+        push(ref(db, `users/${auth.currentUser.uid}/history`), {
+            date: new Date().toLocaleString('th-TH'),
+            result: analysis.result,
+            rgb: analysis.rgb,
+            statusColor: analysis.statusColor
+        });
+
+        document.getElementById('resultArea').innerHTML = `
+            <div class="alert alert-${analysis.statusColor} shadow-sm border-0 py-3">
+                <h5 class="fw-bold mb-1">${analysis.result}</h5>
+                <small>ค่าเฉลี่ยสีลิ้น: RGB(${analysis.rgb})</small>
+            </div>`;
+    };
+
+    // --- 4. ระบบ Authentication & Data Sync ---
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            document.getElementById('authSection').classList.add('d-none');
+            document.getElementById('mainSection').classList.remove('d-none');
+            document.getElementById('btnLogout').classList.remove('d-none');
+            startCamera();
+            
+            // อ่านประวัติแบบ Realtime
+            onValue(ref(db, `users/${user.uid}/history`), (snapshot) => {
+                historyBody.innerHTML = "";
+                if (!snapshot.exists()) {
+                    historyBody.innerHTML = "<tr><td colspan='4' class='text-center py-4 text-muted'>ไม่มีประวัติการตรวจ</td></tr>";
+                    return;
+                }
+                snapshot.forEach(child => {
+                    const data = child.val();
+                    historyBody.innerHTML += `
+                        <tr>
+                            <td><small>${data.date}</small></td>
+                            <td><span class="badge bg-${data.statusColor} badge-status">${data.result}</span></td>
+                            <td><small class="text-muted">${data.rgb}</small></td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-link text-danger p-0" onclick="window.delRecord('${child.key}')">ลบ</button>
+                            </td>
+                        </tr>`;
+                });
+            });
+        } else {
+            document.getElementById('authSection').classList.remove('d-none');
+            document.getElementById('mainSection').classList.add('d-none');
+            document.getElementById('btnLogout').classList.add('d-none');
+        }
+    });
+
+    // ปุ่มสมัครและเข้าสู่ระบบ
+    document.getElementById('btnLogin').onclick = () => {
+        signInWithEmailAndPassword(auth, email.value, password.value).catch(e => alert("อีเมลหรือรหัสผ่านไม่ถูกต้อง"));
+    };
+    document.getElementById('btnSignUp').onclick = () => {
+        createUserWithEmailAndPassword(auth, email.value, password.value)
+            .then(() => alert("สมัครสมาชิกสำเร็จ!"))
+            .catch(e => alert(e.message));
+    };
+    document.getElementById('btnLogout').onclick = () => signOut(auth);
+
+    // ฟังก์ชันลบข้อมูล (CRUD Delete)
+    window.delRecord = (key) => {
+        if(confirm('ยืนยันการลบประวัตินี้?')) {
+            remove(ref(db, `users/${auth.currentUser.uid}/history/${key}`));
+        }
+    };
+</script>
+
+</body>
+</html>
