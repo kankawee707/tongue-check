@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TongueCheck AI - ระบบวิเคราะห์ลิ้นอัจฉริยะ</title>
+    <title>TongueCheck - ระบบวิเคราะห์สุขภาพช่องปากเบื้องต้น</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,44 +17,47 @@
             --p-blue: #0056b3;
             --d-red: #dc3545;
             --w-yellow: #ffc107;
-            --dark: #212529;
+            --light-bg: #f8f9fa;
         }
 
         * { font-family: 'Opun Mai', sans-serif; }
-        body { background-color: #f4f7f6; color: var(--dark); }
+        body { background-color: var(--light-bg); color: #2d3436; }
 
-        /* Navbar */
-        .navbar { border-bottom: 5px solid var(--w-yellow); background-color: var(--p-blue) !important; }
-        .navbar-brand img { height: 45px; border-radius: 8px; margin-right: 12px; }
-        .navbar-brand span { font-weight: 700; letter-spacing: 1px; }
+        /* Navigation */
+        .navbar { border-bottom: 5px solid var(--w-yellow); background-color: var(--p-blue) !important; padding: 15px 0; }
+        .navbar-brand img { height: 45px; border-radius: 12px; margin-right: 15px; border: 2px solid white; }
+        .navbar-brand span { font-weight: 700; font-size: 1.4rem; letter-spacing: 0.5px; }
 
-        /* UI Elements */
-        .card { border: none; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); overflow: hidden; }
-        .btn-round { border-radius: 50px; font-weight: 700; padding: 12px 25px; transition: 0.3s; }
-        .btn-primary { background-color: var(--p-blue); border: none; }
-        .btn-danger { background-color: var(--d-red); border: none; }
+        /* Layout & Cards */
+        .card { border: none; border-radius: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); transition: 0.3s; }
+        .btn-round { border-radius: 50px; font-weight: 700; padding: 12px 28px; border: none; }
+        .btn-primary { background-color: var(--p-blue); }
+        .btn-danger { background-color: var(--d-red); }
         
-        /* Camera UI */
-        #video-container { position: relative; width: 100%; max-width: 420px; margin: auto; }
-        #video { width: 100%; border-radius: 20px; border: 8px solid white; background: #000; display: block; }
+        /* Camera System */
+        #video-container { position: relative; width: 100%; max-width: 400px; margin: auto; }
+        #video { width: 100%; border-radius: 25px; border: 8px solid white; background: #000; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
         .guide-overlay {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 150px; height: 200px; border: 4px dashed var(--w-yellow);
-            border-radius: 50%; pointer-events: none; opacity: 0.8;
+            width: 160px; height: 210px; border: 4px dashed var(--w-yellow);
+            border-radius: 50%; pointer-events: none; opacity: 0.7;
         }
 
-        /* Table */
+        /* Result Display */
+        .result-box { border-radius: 20px; border: none; animation: fadeInDown 0.5s; }
+        .table { background: white; border-radius: 20px; overflow: hidden; }
         .table thead { background-color: var(--p-blue); color: white; }
-        .badge-status { font-size: 0.85rem; padding: 6px 12px; border-radius: 50px; }
+        
+        .status-badge { font-size: 0.85rem; padding: 7px 15px; border-radius: 50px; font-weight: 700; }
     </style>
 </head>
 <body>
 
-<nav class="navbar navbar-dark shadow-sm">
+<nav class="navbar navbar-dark shadow sticky-top">
     <div class="container">
         <a class="navbar-brand d-flex align-items-center" href="#">
             <img src="https://img2.pic.in.th/tongueCheck.jpg" alt="TongueCheck Logo">
-            <span>TongueCheck AI</span>
+            <span>TongueCheck</span>
         </a>
         <button id="btnLogout" class="btn btn-outline-light btn-sm btn-round d-none">ออกจากระบบ</button>
     </div>
@@ -61,37 +65,45 @@
 
 <div class="container py-5">
     
-    <div id="authSection" class="row justify-content-center">
+    <div id="authSection" class="row justify-content-center animate__animated animate__zoomIn">
         <div class="col-md-5">
             <div class="card p-5 text-center">
-                <img src="https://img2.pic.in.th/tongueCheck.jpg" alt="Logo" class="mb-4 mx-auto" style="height: 100px; border-radius: 15px;">
-                <h3 class="fw-bold mb-4" style="color: var(--p-blue);">เข้าสู่ระบบ</h3>
+                <img src="https://img2.pic.in.th/tongueCheck.jpg" alt="Logo" class="mb-4 mx-auto" style="height: 110px; border-radius: 25px;">
+                <h3 class="fw-bold mb-2 text-primary">TongueCheck AI</h3>
+                <p class="text-muted mb-4 small">ระบบวิเคราะห์สุขภาพช่องปากเบื้องต้น</p>
+                
                 <div class="text-start">
-                    <label class="small mb-1">อีเมล</label>
-                    <input type="email" id="email" class="form-control mb-3 btn-round" placeholder="example@mail.com">
-                    <label class="small mb-1">รหัสผ่าน</label>
-                    <input type="password" id="password" class="form-control mb-4 btn-round" placeholder="••••••••">
+                    <div class="mb-3">
+                        <label class="small fw-bold ms-2">อีเมลผู้ใช้งาน</label>
+                        <input type="email" id="email" class="form-control btn-round px-4" placeholder="example@mail.com">
+                    </div>
+                    <div class="mb-4">
+                        <label class="small fw-bold ms-2">รหัสผ่าน</label>
+                        <input type="password" id="password" class="form-control btn-round px-4" placeholder="รหัสผ่าน 6 ตัวขึ้นไป">
+                    </div>
                 </div>
-                <button id="btnLogin" class="btn btn-primary w-100 mb-2 btn-round">เข้าสู่ระบบ</button>
-                <button id="btnSignUp" class="btn btn-outline-secondary w-100 btn-round">สมัครสมาชิกใหม่</button>
+                
+                <button id="btnLogin" class="btn btn-primary w-100 mb-2 btn-round py-3 shadow">เข้าสู่ระบบ</button>
+                <button id="btnSignUp" class="btn btn-link text-muted w-100 btn-sm">ยังไม่มีบัญชี? สมัครสมาชิกที่นี่</button>
+                <div id="authError" class="mt-3 small text-danger fw-bold"></div>
             </div>
         </div>
     </div>
 
-    <div id="mainSection" class="row d-none">
+    <div id="mainSection" class="row d-none animate__animated animate__fadeIn">
         <div class="col-lg-5 mb-4">
             <div class="card p-4 text-center h-100">
-                <h5 class="fw-bold mb-4" style="color: var(--d-red);">📸 ตรวจสอบสุขภาพลิ้น</h5>
+                <h5 class="fw-bold mb-4" style="color: var(--d-red);">📸 สแกนสุขภาพลิ้น</h5>
                 <div id="video-container">
                     <video id="video" autoplay playsinline></video>
                     <div class="guide-overlay"></div>
                 </div>
                 <canvas id="canvas" class="d-none" width="400" height="300"></canvas>
                 
-                <div id="statusMsg" class="mt-3 small fw-bold text-muted">จัดลิ้นให้อยู่ในกรอบสีเหลือง</div>
+                <p id="statusMsg" class="mt-3 small fw-bold text-secondary">กรุณาแลบลิ้นให้อยู่ในกรอบสีเหลือง</p>
                 
-                <button id="btnCapture" class="btn btn-danger btn-lg mt-3 w-100 btn-round shadow">
-                    กดเพื่อวิเคราะห์ผล
+                <button id="btnCapture" class="btn btn-danger btn-lg mt-2 w-100 btn-round shadow-lg py-3">
+                    วิเคราะห์ผลทันที
                 </button>
                 
                 <div id="resultArea" class="mt-4"></div>
@@ -99,20 +111,20 @@
         </div>
 
         <div class="col-lg-7">
-            <div class="card p-4 h-100">
-                <h5 class="fw-bold mb-4" style="color: var(--p-blue);">⏳ ประวัติการวิเคราะห์</h5>
+            <div class="card p-4 h-100 shadow-sm">
+                <h5 class="fw-bold mb-4" style="color: var(--p-blue);">⏳ ประวัติการวิเคราะห์ย้อนหลัง</h5>
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle">
+                    <table class="table table-hover align-middle border-0">
                         <thead>
                             <tr>
                                 <th>วัน-เวลา</th>
                                 <th>ผลการตรวจ</th>
-                                <th>สี (RGB)</th>
-                                <th></th>
+                                <th>ค่าสี (RGB)</th>
+                                <th>จัดการ</th>
                             </tr>
                         </thead>
                         <tbody id="historyBody">
-                            <tr><td colspan="4" class="text-center py-4">กำลังโหลดข้อมูล...</td></tr>
+                            <tr><td colspan="4" class="text-center py-5">กำลังโหลดข้อมูล...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -126,7 +138,7 @@
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
     import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-database.js";
 
-    // ข้อมูล Firebase ของคุณ
+    // --- Firebase Configuration ---
     const firebaseConfig = {
         apiKey: "AIzaSyAT_a_mJqgA4BpJAHsdnFG8DbitAWUoLko",
         authDomain: "tonguecheck.firebaseapp.com",
@@ -144,102 +156,114 @@
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
     const historyBody = document.getElementById('historyBody');
+    const authError = document.getElementById('authError');
 
-    // --- 1. จัดการกล้อง ---
+    // Helper: ตรวจสอบอีเมล
+    const validateEmail = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+
+    // Camera Access
     async function startCamera() {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
             video.srcObject = stream;
-        } catch (err) {
-            alert("ไม่สามารถเข้าถึงกล้องได้: " + err.message);
-        }
+        } catch (err) { console.error("Camera access denied."); }
     }
 
-    // --- 2. การวิเคราะห์ภาพ (Core Logic) ---
-    function analyzeImage() {
+    // Core Processing: สกัดค่าสีและวิเคราะห์ผล
+    function processTongueData() {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+        const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
 
         let rSum = 0, gSum = 0, bSum = 0, count = 0;
-
-        // ดึงค่าสีเฉพาะบริเวณกึ่งกลางภาพ (ตำแหน่งลิ้น)
-        for (let i = 0; i < imgData.length; i += 4) {
-            let r = imgData[i], g = imgData[i+1], b = imgData[i+2];
-            // ตรวจจับพิกเซลที่มีโทนสีแดง/ชมพู
-            if (r > 100 && r > g) {
+        // วนลูปเช็คพิกเซลเฉพาะช่วงกลางภาพ
+        for (let i = 0; i < data.length; i += 4) {
+            let r = data[i], g = data[i+1], b = data[i+2];
+            // กรองพิกเซลที่เป็นโทนสีเนื้อ/แดง (ลิ้น)
+            if (r > 110 && r > g && r > b/2) {
                 rSum += r; gSum += g; bSum += b; count++;
             }
         }
 
-        if (count < 800) return { error: "หาลิ้นไม่พบ! กรุณาวางลิ้นให้ตรงกรอบ" };
+        if (count < 1000) return { err: "❌ วางตำแหน่งลิ้นไม่ถูกต้อง" };
 
         const avgR = Math.floor(rSum / count);
         const avgG = Math.floor(gSum / count);
         const avgB = Math.floor(bSum / count);
 
-        // วิเคราะห์ความเสี่ยง (Rule-based)
-        let result = "สุขภาพปกติ";
-        let statusColor = "success";
+        // วิเคราะห์สุขภาพ (Rule-based)
+        let msg = "สุขภาพปกติ", col = "success";
+        if (avgG > 175 && avgR > 185) { msg = "พบฝ้าขาวหนา"; col = "warning"; }
+        else if (avgR > 225 && avgG < 120) { msg = "ลิ้นแดงอักเสบ"; col = "danger"; }
+        else if (avgR < 150 && avgG < 150) { msg = "ลิ้นสีซีด"; col = "info"; }
 
-        if (avgG > 170 && avgR > 180) { result = "พบฝ้าขาวสะสม"; statusColor = "warning"; }
-        else if (avgR > 220 && avgG < 110) { result = "ลิ้นแดงผิดปกติ (อักเสบ)"; statusColor = "danger"; }
-        else if (avgR < 140) { result = "ลิ้นซีด (เสี่ยงโลหิตจาง)"; statusColor = "info"; }
-
-        return { result, rgb: `${avgR},${avgG},${avgB}`, statusColor };
+        return { msg, rgb: `${avgR},${avgG},${avgB}`, col };
     }
 
-    // --- 3. บันทึกข้อมูลลง Firebase ---
+    // บันทึกผลตรวจ
     document.getElementById('btnCapture').onclick = () => {
-        const analysis = analyzeImage();
-        if (analysis.error) {
-            document.getElementById('statusMsg').innerText = analysis.error;
-            document.getElementById('statusMsg').classList.add('text-danger');
+        const result = processTongueData();
+        if (result.err) {
+            document.getElementById('statusMsg').innerText = result.err;
+            document.getElementById('statusMsg').className = "mt-3 small fw-bold text-danger";
             return;
         }
 
-        document.getElementById('statusMsg').innerText = "วิเคราะห์สำเร็จ!";
-        document.getElementById('statusMsg').classList.replace('text-danger', 'text-success');
+        document.getElementById('statusMsg').innerText = "วิเคราะห์เรียบร้อย!";
+        document.getElementById('statusMsg').className = "mt-3 small fw-bold text-success";
 
         push(ref(db, `users/${auth.currentUser.uid}/history`), {
             date: new Date().toLocaleString('th-TH'),
-            result: analysis.result,
-            rgb: analysis.rgb,
-            statusColor: analysis.statusColor
+            result: result.msg,
+            rgb: result.rgb,
+            statusColor: result.col
         });
 
         document.getElementById('resultArea').innerHTML = `
-            <div class="alert alert-${analysis.statusColor} shadow-sm border-0 py-3">
-                <h5 class="fw-bold mb-1">${analysis.result}</h5>
-                <small>ค่าเฉลี่ยสีลิ้น: RGB(${analysis.rgb})</small>
+            <div class="alert alert-${result.col} result-box shadow-sm py-3 border-0">
+                <h5 class="fw-bold mb-1">ผลตรวจ: ${result.msg}</h5>
+                <p class="mb-0 small">ค่าเฉลี่ยพิกเซล: RGB(${result.rgb})</p>
             </div>`;
     };
 
-    // --- 4. ระบบ Authentication & Data Sync ---
+    // Authentication Logic
+    document.getElementById('btnLogin').onclick = () => {
+        const email = document.getElementById('email').value.trim();
+        const pass = document.getElementById('password').value;
+        if (!validateEmail(email)) return authError.innerText = "อีเมลไม่ถูกต้อง";
+        signInWithEmailAndPassword(auth, email, pass).catch(e => authError.innerText = "อีเมลหรือรหัสผ่านผิดพลาด");
+    };
+
+    document.getElementById('btnSignUp').onclick = () => {
+        const email = document.getElementById('email').value.trim();
+        const pass = document.getElementById('password').value;
+        if (!validateEmail(email)) return authError.innerText = "กรุณากรอกอีเมลให้ถูกต้อง";
+        if (pass.length < 6) return authError.innerText = "รหัสผ่านต้องมี 6 ตัวขึ้นไป";
+        createUserWithEmailAndPassword(auth, email, pass).then(() => alert("สมัครสมาชิกสำเร็จ!")).catch(e => authError.innerText = e.message);
+    };
+
+    document.getElementById('btnLogout').onclick = () => signOut(auth);
+
     onAuthStateChanged(auth, (user) => {
         if (user) {
             document.getElementById('authSection').classList.add('d-none');
             document.getElementById('mainSection').classList.remove('d-none');
             document.getElementById('btnLogout').classList.remove('d-none');
             startCamera();
-            
-            // อ่านประวัติแบบ Realtime
-            onValue(ref(db, `users/${user.uid}/history`), (snapshot) => {
+            onValue(ref(db, `users/${user.uid}/history`), (snap) => {
                 historyBody.innerHTML = "";
-                if (!snapshot.exists()) {
-                    historyBody.innerHTML = "<tr><td colspan='4' class='text-center py-4 text-muted'>ไม่มีประวัติการตรวจ</td></tr>";
+                if (!snap.exists()) {
+                    historyBody.innerHTML = "<tr><td colspan='4' class='text-center py-5 text-muted'>ยังไม่มีประวัติการตรวจ</td></tr>";
                     return;
                 }
-                snapshot.forEach(child => {
-                    const data = child.val();
+                snap.forEach(child => {
+                    const d = child.val();
                     historyBody.innerHTML += `
-                        <tr>
-                            <td><small>${data.date}</small></td>
-                            <td><span class="badge bg-${data.statusColor} badge-status">${data.result}</span></td>
-                            <td><small class="text-muted">${data.rgb}</small></td>
-                            <td class="text-end">
-                                <button class="btn btn-sm btn-link text-danger p-0" onclick="window.delRecord('${child.key}')">ลบ</button>
-                            </td>
+                        <tr class="animate__animated animate__fadeIn">
+                            <td><small>${d.date}</small></td>
+                            <td><span class="badge bg-${d.statusColor} status-badge">${d.result}</span></td>
+                            <td><code class="text-dark small">${d.rgb}</code></td>
+                            <td class="text-end"><button class="btn btn-sm text-danger fw-bold" onclick="window.del('${child.key}')">ลบ</button></td>
                         </tr>`;
                 });
             });
@@ -250,24 +274,7 @@
         }
     });
 
-    // ปุ่มสมัครและเข้าสู่ระบบ
-    document.getElementById('btnLogin').onclick = () => {
-        signInWithEmailAndPassword(auth, email.value, password.value).catch(e => alert("อีเมลหรือรหัสผ่านไม่ถูกต้อง"));
-    };
-    document.getElementById('btnSignUp').onclick = () => {
-        createUserWithEmailAndPassword(auth, email.value, password.value)
-            .then(() => alert("สมัครสมาชิกสำเร็จ!"))
-            .catch(e => alert(e.message));
-    };
-    document.getElementById('btnLogout').onclick = () => signOut(auth);
-
-    // ฟังก์ชันลบข้อมูล (CRUD Delete)
-    window.delRecord = (key) => {
-        if(confirm('ยืนยันการลบประวัตินี้?')) {
-            remove(ref(db, `users/${auth.currentUser.uid}/history/${key}`));
-        }
-    };
+    window.del = (k) => { if(confirm('ต้องการลบประวัตินี้?')) remove(ref(db, `users/${auth.currentUser.uid}/history/${k}`)); };
 </script>
-
 </body>
 </html>
