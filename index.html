@@ -3,88 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TongueCheck - ระบบวิเคราะห์สุขภาพช่องปากเบื้องต้น</title>
+    <title>TongueCheck - Oral Health AI</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link href="https://fonts.googleapis.com/css2?family=Opun+Mai:wght@300;400;700&display=swap" rel="stylesheet">
 
     <style>
-        :root { --p-blue: #0056b3; --d-red: #dc3545; --w-yellow: #ffc107; --bg: #f4f7f6; }
+        :root { --p-blue: #0056b3; --d-red: #dc3545; --w-yellow: #ffc107; --bg: #f8f9fa; }
         * { font-family: 'Opun Mai', sans-serif; }
-        body { background-color: var(--bg); color: #333; }
-        .navbar { background-color: var(--p-blue) !important; border-bottom: 5px solid var(--w-yellow); padding: 15px 0; }
-        .navbar-brand img { height: 40px; border-radius: 10px; border: 2px solid white; margin-right: 12px; }
-        .card { border-radius: 25px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.08); overflow: hidden; }
-        .btn-round { border-radius: 50px; font-weight: 700; padding: 10px 25px; transition: 0.3s; }
-        
-        /* Camera UI */
-        #video-container { position: relative; width: 100%; max-width: 380px; margin: auto; }
-        #video { width: 100%; border-radius: 20px; border: 6px solid white; background: #000; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        body { background-color: var(--bg); color: #333; overflow-x: hidden; }
+        .navbar { background-color: var(--p-blue) !important; border-bottom: 4px solid var(--w-yellow); }
+        .card { border-radius: 25px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.05); transition: 0.3s; }
+        .menu-card { cursor: pointer; border-radius: 30px !important; }
+        .menu-card:hover { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important; }
+        .btn-round { border-radius: 50px; font-weight: 700; padding: 12px 25px; }
+        #video { width: 100%; max-width: 400px; border-radius: 20px; border: 5px solid white; background: #000; }
         .guide-overlay {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 150px; height: 200px; border: 3px dashed var(--w-yellow);
-            border-radius: 50%; pointer-events: none; opacity: 0.6;
+            width: 140px; height: 180px; border: 3px dashed var(--w-yellow); border-radius: 50%; pointer-events: none; opacity: 0.5;
         }
-
-        /* Navigation Tabs */
-        .nav-pills .nav-link { color: #666; font-weight: bold; border-radius: 15px; margin: 0 5px; }
-        .nav-pills .nav-link.active { background-color: var(--p-blue) !important; color: white !important; }
-        
-        .list-group-item { border: none; background: #fff; margin-bottom: 8px; border-radius: 12px !important; box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
         .checked-task { text-decoration: line-through; opacity: 0.5; }
+        .quiz-option { border-radius: 15px; text-align: left; padding: 15px; margin-bottom: 10px; transition: 0.2s; }
     </style>
 </head>
 <body>
 
 <nav class="navbar navbar-dark shadow sticky-top">
     <div class="container">
-        <a class="navbar-brand d-flex align-items-center" href="#">
-            <img src="https://img2.pic.in.th/tongueCheck.jpg" alt="Logo">
-            <span>TongueCheck</span>
+        <a class="navbar-brand d-flex align-items-center" href="#" onclick="showHome()">
+            <span class="fs-3 me-2">👅</span> <strong>TongueCheck</strong>
         </a>
         <button id="btnLogout" class="btn btn-outline-light btn-sm btn-round d-none">ออกจากระบบ</button>
     </div>
 </nav>
 
 <div class="container py-4">
-    
-    <div id="authSection" class="row justify-content-center">
-        <div class="col-md-5 mt-5">
-            <div class="card p-5 text-center">
-                <h3 class="fw-bold mb-4 text-primary">ยินดีต้อนรับ</h3>
-                <input type="email" id="email" class="form-control mb-3 btn-round px-4" placeholder="อีเมล">
-                <input type="password" id="password" class="form-control mb-4 btn-round px-4" placeholder="รหัสผ่าน (6 ตัวขึ้นไป)">
-                <button id="btnLogin" class="btn btn-primary w-100 mb-2 btn-round py-3">เข้าสู่ระบบ</button>
-                <button id="btnSignUp" class="btn btn-outline-secondary w-100 btn-round">สมัครสมาชิกใหม่</button>
-                <div id="authError" class="mt-3 small text-danger fw-bold"></div>
+
+    <div id="authSection" class="row justify-content-center pt-5">
+        <div class="col-md-5">
+            <div class="card p-5 text-center shadow-lg">
+                <h3 class="fw-bold mb-4 text-primary">เข้าสู่ระบบ</h3>
+                <input type="email" id="email" class="form-control mb-3 btn-round" placeholder="อีเมล">
+                <input type="password" id="password" class="form-control mb-4 btn-round" placeholder="รหัสผ่าน">
+                <button id="btnLogin" class="btn btn-primary w-100 mb-2 btn-round">เข้าสู่ระบบ</button>
+                <button id="btnSignUp" class="btn btn-outline-secondary w-100 btn-round">สมัครสมาชิก</button>
             </div>
         </div>
     </div>
 
-    <div id="mainSection" class="d-none">
-        <ul class="nav nav-pills mb-4 justify-content-center" id="pills-tab">
-            <li class="nav-item"><button class="nav-link active shadow-sm" data-bs-toggle="pill" data-bs-target="#scan-tab">📸 วิเคราะห์</button></li>
-            <li class="nav-item"><button class="nav-link shadow-sm" data-bs-toggle="pill" data-bs-target="#plan-tab">📅 แพลนเนอร์</button></li>
-            <li class="nav-item"><button class="nav-link shadow-sm" data-bs-toggle="pill" data-bs-target="#chart-tab">📊 กราฟสรุป</button></li>
-            <li class="nav-item"><button class="nav-link shadow-sm" data-bs-toggle="pill" data-bs-target="#history-tab">⏳ ประวัติ</button></li>
-        </ul>
+    <div id="mainSection" class="d-none animate__animated animate__fadeIn">
+        
+        <div id="homePage">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold">ยินดีต้อนรับคุณ!</h2>
+                <p class="text-muted">เลือกฟังก์ชันเพื่อดูแลสุขภาพลิ้นของคุณวันนี้</p>
+            </div>
+            <div class="row g-4 justify-content-center">
+                <div class="col-6 col-md-4"><div class="card p-4 menu-card text-center bg-white" onclick="showPage('scan-tab')"><div class="display-4">📸</div><h6 class="mt-2 fw-bold">วิเคราะห์ลิ้น</h6></div></div>
+                <div class="col-6 col-md-4"><div class="card p-4 menu-card text-center bg-white" onclick="showPage('plan-tab')"><div class="display-4">📅</div><h6 class="mt-2 fw-bold">แพลนเนอร์</h6></div></div>
+                <div class="col-6 col-md-4"><div class="card p-4 menu-card text-center bg-white" onclick="showPage('quiz-tab')"><div class="display-4">📝</div><h6 class="mt-2 fw-bold">แบบทดสอบ</h6></div></div>
+                <div class="col-6 col-md-4"><div class="card p-4 menu-card text-center bg-white" onclick="showPage('history-tab')"><div class="display-4">⏳</div><h6 class="mt-2 fw-bold">ประวัติ</h6></div></div>
+                <div class="col-6 col-md-4"><div class="card p-4 menu-card text-center bg-white" onclick="showPage('chart-tab')"><div class="display-4">📊</div><h6 class="mt-2 fw-bold">สถิติ</h6></div></div>
+            </div>
+        </div>
 
-        <div class="tab-content">
-            <div class="tab-pane fade show active" id="scan-tab">
+        <div id="pageContent" class="d-none">
+            <button class="btn btn-light btn-round mb-4 shadow-sm" onclick="showHome()">⬅️ กลับหน้าหลัก</button>
+            
+            <div class="content-view d-none" id="scan-tab">
                 <div class="row justify-content-center">
                     <div class="col-md-6 text-center">
-                        <div class="card p-4 mb-4">
-                            <div id="video-container">
+                        <div class="card p-4 shadow">
+                            <div class="position-relative d-inline-block">
                                 <video id="video" autoplay playsinline></video>
                                 <div class="guide-overlay"></div>
                             </div>
                             <div class="d-flex gap-2 mt-3">
                                 <button id="btnSwitch" class="btn btn-outline-dark flex-grow-1 btn-round">🔄 สลับกล้อง</button>
-                                <button id="btnCapture" class="btn btn-danger flex-grow-2 btn-round px-5 shadow">วิเคราะห์สุขภาพ</button>
+                                <button id="btnCapture" class="btn btn-danger flex-grow-2 btn-round shadow px-4">ตรวจสุขภาพ</button>
                             </div>
                             <canvas id="canvas" class="d-none" width="400" height="300"></canvas>
                             <div id="resultArea" class="mt-4 text-start"></div>
@@ -93,47 +91,51 @@
                 </div>
             </div>
 
-            <div class="tab-pane fade" id="plan-tab">
+            <div class="content-view d-none" id="plan-tab">
                 <div class="row justify-content-center">
-                    <div class="col-md-8">
-                        <div class="card p-4 mb-3 border-0 shadow-sm" style="background: #eef7ff;">
-                            <h6 class="fw-bold text-primary mb-3">✨ แนะนำเพื่อคุณ (กดเพิ่มได้เลย)</h6>
-                            <div class="d-flex flex-wrap gap-2">
-                                <button class="btn btn-sm btn-white shadow-sm border rounded-pill bg-white" onclick="window.addSuggested('แปรงลิ้นเช้า-เย็น')">+ แปรงลิ้น</button>
-                                <button class="btn btn-sm btn-white shadow-sm border rounded-pill bg-white" onclick="window.addSuggested('ดื่มน้ำ 2.5 ลิตร/วัน')">+ ดื่มน้ำเพิ่ม</button>
-                                <button class="btn btn-sm btn-white shadow-sm border rounded-pill bg-white" onclick="window.addSuggested('งดอาหารเผ็ดจัด')">+ เลี่ยงรสจัด</button>
-                            </div>
-                        </div>
+                    <div class="col-md-7">
                         <div class="card p-4">
-                            <h5 class="fw-bold mb-3">📅 ตารางดูแลส่วนตัว</h5>
-                            <div class="input-group mb-3">
-                                <input type="text" id="planInput" class="form-control" placeholder="พิมพ์แพลนใหม่ที่นี่...">
-                                <button id="btnAddPlan" class="btn btn-primary px-4 btn-round">เพิ่ม</button>
+                            <h5 class="fw-bold mb-4">📅 จัดการแพลนรายวัน</h5>
+                            <div class="mb-3 d-flex align-items-center gap-2">
+                                <label class="small fw-bold">เลือกวันที่:</label>
+                                <input type="date" id="planDate" class="form-control btn-round w-auto">
                             </div>
-                            <ul id="planList" class="list-group"></ul>
+                            <div class="input-group mb-4">
+                                <input type="text" id="planInput" class="form-control" placeholder="ระบุแพลน เช่น แปรงลิ้น...">
+                                <button id="btnAddPlan" class="btn btn-primary px-4">เพิ่ม</button>
+                            </div>
+                            <ul id="planList" class="list-group list-group-flush"></ul>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="tab-pane fade" id="chart-tab">
-                <div class="card p-4">
-                    <h5 class="fw-bold mb-3 text-primary text-center">📈 กราฟแนวโน้มระดับฝ้าขาว (7 ครั้งล่าสุด)</h5>
-                    <div style="max-height: 400px;"><canvas id="healthChart"></canvas></div>
-                </div>
-            </div>
-
-            <div class="tab-pane fade" id="history-tab">
-                <div class="card p-4">
-                    <h5 class="fw-bold mb-3">⏳ ประวัติการวิเคราะห์</h5>
-                    <div class="table-responsive">
-                        <table class="table align-middle">
-                            <thead class="table-light"><tr><th>วัน-เวลา</th><th>ผล</th><th>ลักษณะ</th><th>จัดการ</th></tr></thead>
-                            <tbody id="historyBody"></tbody>
-                        </table>
+            <div class="content-view d-none" id="quiz-tab">
+                <div class="row justify-content-center">
+                    <div class="col-md-7">
+                        <div class="card p-4 shadow border-0">
+                            <div id="quiz-box">
+                                <h5 id="q-text" class="fw-bold mb-4"></h5>
+                                <div id="options-box" class="d-grid"></div>
+                            </div>
+                            <div id="quiz-result" class="d-none text-center py-4">
+                                <div id="res-icon" style="font-size: 80px;"></div>
+                                <h3 id="res-title" class="fw-bold mt-3"></h3>
+                                <p id="res-desc" class="text-muted px-3"></p>
+                                <button class="btn btn-primary btn-round mt-3" onclick="startQuiz()">ทำใหม่</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <div class="content-view d-none" id="history-tab">
+                <div class="card p-4"><h5 class="fw-bold mb-3">⏳ ประวัติการวิเคราะห์</h5><div class="table-responsive"><table class="table align-middle"><tbody id="historyBody"></tbody></table></div></div>
+            </div>
+            <div class="content-view d-none" id="chart-tab">
+                <div class="card p-4"><h5 class="fw-bold mb-3 text-center">📊 ระดับฝ้าขาวสะสม (7 ครั้งล่าสุด)</h5><canvas id="healthChart"></canvas></div>
+            </div>
+
         </div>
     </div>
 </div>
@@ -157,132 +159,128 @@
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    let currentStream = null;
-    let cameraMode = "user";
-    let myChart = null;
+    let currentStream = null, cameraMode = "user", myChart = null;
+    const datePicker = document.getElementById('planDate');
+    datePicker.value = new Date().toISOString().split('T')[0];
 
-    // --- กล้องและสลับกล้อง ---
+    // --- NAVIGATION LOGIC ---
+    window.showPage = (id) => {
+        document.getElementById('homePage').classList.add('d-none');
+        document.getElementById('pageContent').classList.remove('d-none');
+        document.querySelectorAll('.content-view').forEach(v => v.classList.add('d-none'));
+        document.getElementById(id).classList.remove('d-none');
+        if(id === 'scan-tab') startCamera();
+        if(id === 'quiz-tab') startQuiz();
+        if(id === 'chart-tab') initChart();
+    };
+    window.showHome = () => {
+        document.getElementById('homePage').classList.remove('d-none');
+        document.getElementById('pageContent').classList.add('d-none');
+        if (currentStream) currentStream.getTracks().forEach(t => t.stop());
+    };
+
+    // --- CAMERA & ANALYSIS ---
     async function startCamera() {
-        if (currentStream) currentStream.getTracks().forEach(track => track.stop());
+        if (currentStream) currentStream.getTracks().forEach(t => t.stop());
         try {
             currentStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: cameraMode } });
             document.getElementById('video').srcObject = currentStream;
-        } catch (e) { alert("เข้าถึงกล้องไม่ได้"); }
+        } catch (e) { alert("เปิดกล้องไม่ได้"); }
     }
-
-    document.getElementById('btnSwitch').onclick = () => {
-        cameraMode = (cameraMode === "user") ? "environment" : "user";
-        startCamera();
-    };
-
-    // --- การวิเคราะห์ (สี + ลักษณะ) ---
-    function performAnalysis() {
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-
-        let rS = 0, gS = 0, bS = 0, count = 0;
-        for (let i = 0; i < data.length; i += 4) {
-            if (data[i] > 100) { rS += data[i]; gS += data[i+1]; bS += data[i+2]; count++; }
-        }
-        if (count < 1000) return { err: "❌ กรุณาแลบลิ้นให้ตรงวงรี" };
-
-        let avgR = rS / count, avgG = gS / count, avgB = bS / count;
-        let res = { name: "ปกติ", symptom: "สีชมพูเรื่อ พื้นผิวสมบูรณ์", cause: "สุขภาพดี", solution: "แปรงลิ้นสม่ำเสมอ", color: "success", gVal: avgG };
-
-        if (avgG > 175) {
-            res = { name: "ฝ้าขาว (Leukoplakia)", symptom: "มีแผ่นขาวหนา", cause: "แบคทีเรียสะสม/ปากแห้ง", solution: "แปรงลิ้นทุกวัน ดื่มน้ำ 8 แก้ว", color: "warning", gVal: avgG };
-        } else if (avgR > 215) {
-            res = { name: "ลิ้นสตรอว์เบอร์รี / อักเสบ", symptom: "แดงจัด มีตุ่มนูน", cause: "ขาดวิตามิน/ร้อนใน", solution: "เลี่ยงรสจัด ทานผักผลไม้", color: "danger", gVal: avgG };
-        } else if (avgB > 145) {
-            res = { name: "ลิ้นสีม่วงคล้ำ", symptom: "สีหม่นเข้ม", cause: "เลือดไหลเวียนไม่สะดวก", solution: "นอนให้พอ เลิกสูบบุหรี่", color: "dark", gVal: avgG };
-        }
-        return { ...res, rgb: `${Math.floor(avgR)},${Math.floor(avgG)},${Math.floor(avgB)}` };
-    }
+    document.getElementById('btnSwitch').onclick = () => { cameraMode = (cameraMode === "user") ? "environment" : "user"; startCamera(); };
 
     document.getElementById('btnCapture').onclick = () => {
-        const res = performAnalysis();
-        if (res.err) { alert(res.err); return; }
+        const video = document.getElementById('video'); const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d'); ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+        let rS = 0, gS = 0, bS = 0, count = 0;
+        for (let i = 0; i < data.length; i += 4) { if (data[i] > 100) { rS += data[i]; gS += data[i+1]; bS += data[i+2]; count++; } }
+        if (count < 1000) { alert("กรุณาแลบลิ้นให้ตรงกรอบ"); return; }
+        
+        let avgR = rS/count, avgG = gS/count, avgB = bS/count;
+        let res = { name: "ปกติ", symptom: "ชมพูสุขภาพดี", solution: "ดูแลสม่ำเสมอ", color: "success", gVal: avgG };
+        if(avgG > 170) res = { name: "ฝ้าขาว", symptom: "มีคราบขาวสะสม", solution: "แปรงลิ้นและดื่มน้ำเพิ่ม", color: "warning", gVal: avgG };
+        else if(avgR > 210) res = { name: "ลิ้นอักเสบ", symptom: "แดงจัด/มีตุ่ม", solution: "เลี่ยงรสจัด พักผ่อนให้พอ", color: "danger", gVal: avgG };
 
-        push(ref(db, `users/${auth.currentUser.uid}/history`), {
-            date: new Date().toLocaleString('th-TH'),
-            ...res
-        });
-
-        document.getElementById('resultArea').innerHTML = `
-            <div class="alert alert-${res.color} border-0 shadow-sm p-4 animate__animated animate__fadeIn">
-                <h4 class="fw-bold">${res.name}</h4><hr>
-                <p><strong>ลักษณะ:</strong> ${res.symptom}</p>
-                <p class="mb-0"><strong>คำแนะนำ:</strong> ${res.solution}</p>
-            </div>`;
+        push(ref(db, `users/${auth.currentUser.uid}/history`), { date: new Date().toLocaleString('th-TH'), ...res });
+        document.getElementById('resultArea').innerHTML = `<div class="alert alert-${res.color} p-4 border-0 shadow"><h4>${res.name}</h4><hr><p>${res.symptom}</p><p class='small'><b>วิธีแก้:</b> ${res.solution}</p></div>`;
     };
 
-    // --- กราฟ Chart.js ---
-    function initChart(uid) {
-        onValue(ref(db, `users/${uid}/history`), (snap) => {
-            const labels = []; const values = [];
-            snap.forEach(c => {
-                labels.push(c.val().date.split(',')[0]);
-                values.push(c.val().gVal || 0);
-            });
-            const last7Labels = labels.slice(-7); const last7Values = values.slice(-7);
-
-            const ctx = document.getElementById('healthChart').getContext('2d');
-            if (myChart) myChart.destroy();
-            myChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: last7Labels,
-                    datasets: [{ label: 'ระดับฝ้าขาว', data: last7Values, borderColor: '#0056b3', backgroundColor: 'rgba(0,86,179,0.1)', fill: true, tension: 0.3 }]
-                }
-            });
-        });
-    }
-
-    // --- แพลนเนอร์ ---
-    window.addSuggested = (t) => { push(ref(db, `users/${auth.currentUser.uid}/plans`), { task: t, status: 'pending' }); };
+    // --- PLANNER LOGIC ---
+    datePicker.onchange = () => loadPlans();
     document.getElementById('btnAddPlan').onclick = () => {
-        const t = document.getElementById('planInput').value; if(!t) return;
-        push(ref(db, `users/${auth.currentUser.uid}/plans`), { task: t, status: 'pending' });
+        const task = document.getElementById('planInput').value; if(!task) return;
+        push(ref(db, `users/${auth.currentUser.uid}/plans/${datePicker.value}`), { task, status: 'pending' });
         document.getElementById('planInput').value = "";
     };
-
-    function loadPlans(uid) {
-        onValue(ref(db, `users/${uid}/plans`), (snap) => {
+    function loadPlans() {
+        onValue(ref(db, `users/${auth.currentUser.uid}/plans/${datePicker.value}`), (snap) => {
             const list = document.getElementById('planList'); list.innerHTML = "";
             snap.forEach(c => {
-                const d = c.val(); const isDone = d.status === 'done';
-                list.innerHTML += `
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <div onclick="window.togglePlan('${c.key}', '${d.status}')" style="cursor:pointer">
-                            <input type="checkbox" class="me-2" ${isDone?'checked':''}>
-                            <span class="${isDone?'checked-task':''}">${d.task}</span>
-                        </div>
-                        <button class="btn btn-sm text-danger" onclick="window.delPlan('${c.key}')">ลบ</button>
-                    </li>`;
+                const d = c.val();
+                list.innerHTML += `<li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div onclick="window.togglePlan('${datePicker.value}','${c.key}','${d.status}')" style="cursor:pointer">
+                        <input type="checkbox" ${d.status==='done'?'checked':''}> <span class="${d.status==='done'?'checked-task':''}">${d.task}</span>
+                    </div>
+                    <button class="btn btn-sm text-danger" onclick="window.delPlan('${datePicker.value}','${c.key}')">ลบ</button>
+                </li>`;
             });
         });
     }
 
-    // --- ระบบสมาชิกและซิงค์ข้อมูล ---
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
+    // --- QUIZ LOGIC ---
+    const questions = [
+        { q: "1. แปรงลิ้นบ่อยแค่ไหน?", opts: ["ทุกเช้า-เย็น", "วันละครั้ง", "นานๆ ที", "ไม่เคย"], s: [1, 0.7, 0.4, 0] },
+        { q: "2. ดื่มน้ำวันละกี่แก้ว?", opts: ["8 แก้ว+", "5-7 แก้ว", "3-4 แก้ว", "น้อยมาก"], s: [1, 0.8, 0.5, 0] },
+        { q: "3. กินผักผลไม้บ่อยไหม?", opts: ["ทุกวัน", "บ่อย", "นานๆ ที", "ไม่เลย"], s: [1, 0.8, 0.4, 0] },
+        { q: "4. ชอบกินของเผ็ดจัดไหม?", opts: ["ไม่เลย", "บางครั้ง", "ชอบมาก", "ทุกมื้อ"], s: [1, 0.7, 0.3, 0] },
+        { q: "5. เคยใช้ที่ขูดลิ้นไหม?", opts: ["ใช้ประจำ", "ใช้แปรงแทน", "ไม่เคย", "ไม่รู้จัก"], s: [1, 0.8, 0.3, 0] },
+        { q: "6. สูบบุหรี่/ดื่มสุราไหม?", opts: ["ไม่เลย", "นานๆ ที", "บ่อย", "ประจำ"], s: [1, 0.7, 0.3, 0] },
+        { q: "7. ปากแห้งบ่อยไหม?", opts: ["ไม่เคย", "บางครั้ง", "บ่อย", "ตลอดเวลา"], s: [1, 0.7, 0.4, 0] },
+        { q: "8. นอนหลับเพียงพอไหม?", opts: ["พอ", "เกือบพอ", "น้อย", "ไม่พอเลย"], s: [1, 0.8, 0.4, 0] },
+        { q: "9. สังเกตลิ้นตัวเองบ่อยไหม?", opts: ["ทุกวัน", "บ่อย", "นานๆ ที", "ไม่เคย"], s: [1, 0.8, 0.4, 0] },
+        { q: "10. ไปหาหมอฟันตามนัดไหม?", opts: ["ทุก 6 เดือน", "ปีละครั้ง", "นานๆ ที", "ไม่ไปเลย"], s: [1, 0.8, 0.4, 0] }
+    ];
+    let curQ = 0, score = 0;
+    window.startQuiz = () => { curQ = 0; score = 0; document.getElementById('quiz-box').classList.remove('d-none'); document.getElementById('quiz-result').classList.add('d-none'); showQ(); };
+    function showQ() {
+        const q = questions[curQ]; document.getElementById('q-text').innerText = q.q;
+        const b = document.getElementById('options-box'); b.innerHTML = "";
+        q.opts.forEach((o, i) => {
+            const btn = document.createElement('button'); btn.className = "btn btn-outline-primary quiz-option mb-2";
+            btn.innerText = o; btn.onclick = () => { score += q.s[i]; curQ++; if(curQ < 10) showQ(); else endQuiz(); };
+            b.appendChild(btn);
+        });
+    }
+    function endQuiz() {
+        document.getElementById('quiz-box').classList.add('d-none'); document.getElementById('quiz-result').classList.remove('d-none');
+        const icon = document.getElementById('res-icon'), title = document.getElementById('res-title'), desc = document.getElementById('res-desc');
+        if(score >= 8.5) { icon.innerText="🌸"; title.innerText="ลิ้นสดใส"; desc.innerText="คุณดูแลสุขภาพช่องปากได้ยอดเยี่ยมมากครับ!"; }
+        else if(score >= 5.5) { icon.innerText="🌿"; title.innerText="ลิ้นพอใช้"; desc.innerText="สุขภาพปานกลาง ลองดื่มน้ำและแปรงลิ้นให้สม่ำเสมอขึ้นนะครับ"; }
+        else { icon.innerText="☁️"; title.innerText="ลิ้นซึม"; desc.innerText="ควรปรับพฤติกรรมการกินและเริ่มแปรงลิ้นอย่างจริงจังครับ"; }
+    }
+
+    // --- CHART & HISTORY ---
+    function initChart() {
+        onValue(ref(db, `users/${auth.currentUser.uid}/history`), (snap) => {
+            const labels = [], vals = [];
+            snap.forEach(c => { labels.push(c.val().date.split(',')[0]); vals.push(c.val().gVal || 150); });
+            const ctx = document.getElementById('healthChart').getContext('2d');
+            if(myChart) myChart.destroy();
+            myChart = new Chart(ctx, { type: 'line', data: { labels: labels.slice(-7), datasets: [{ label: 'ระดับความสะอาด', data: vals.slice(-7), borderColor: '#0056b3', tension: 0.3, fill: true, backgroundColor: 'rgba(0,86,179,0.1)' }] } });
+        });
+    }
+
+    // --- AUTH & SYNC ---
+    onAuthStateChanged(auth, (u) => {
+        if(u) {
             document.getElementById('authSection').classList.add('d-none');
             document.getElementById('mainSection').classList.remove('d-none');
             document.getElementById('btnLogout').classList.remove('d-none');
-            startCamera(); loadPlans(user.uid); initChart(user.uid);
-            onValue(ref(db, `users/${user.uid}/history`), (snap) => {
-                const tbody = document.getElementById('historyBody'); tbody.innerHTML = "";
-                snap.forEach(c => {
-                    const d = c.val();
-                    tbody.innerHTML += `<tr>
-                        <td><small>${d.date}</small></td>
-                        <td><span class="badge bg-${d.color}">${d.name}</span></td>
-                        <td><small>${d.symptom}</small></td>
-                        <td><button class="btn btn-sm text-danger" onclick="window.delHis('${c.key}')">ลบ</button></td></tr>`;
-                });
+            loadPlans();
+            onValue(ref(db, `users/${u.uid}/history`), (s) => {
+                const b = document.getElementById('historyBody'); b.innerHTML = "";
+                s.forEach(c => { const d = c.val(); b.innerHTML += `<tr><td><small>${d.date}</small></td><td><span class="badge bg-${d.color}">${d.name}</span></td><td><button class="btn btn-sm text-danger" onclick="window.delHis('${c.key}')">ลบ</button></td></tr>`; });
             });
         } else {
             document.getElementById('authSection').classList.remove('d-none');
@@ -290,17 +288,11 @@
         }
     });
 
-    // Helper Functions สำหรับปุ่มลบ/ติ๊กถูก
-    window.delHis = (k) => { if(confirm('ลบประวัติ?')) remove(ref(db, `users/${auth.currentUser.uid}/history/${k}`)); };
-    window.delPlan = (k) => remove(ref(db, `users/${auth.currentUser.uid}/plans/${k}`));
-    window.togglePlan = (k, s) => update(ref(db, `users/${auth.currentUser.uid}/plans/${k}`), { status: s==='done'?'pending':'done' });
-
-    // Auth Buttons
-    document.getElementById('btnLogin').onclick = () => signInWithEmailAndPassword(auth, email.value, password.value).catch(e => alert("อีเมล/รหัสผ่านไม่ถูกต้อง"));
-    document.getElementById('btnSignUp').onclick = () => {
-        if(password.value.length < 6) return alert("รหัสผ่านต้องมี 6 ตัวขึ้นไป");
-        createUserWithEmailAndPassword(auth, email.value, password.value).then(() => alert("สมัครสำเร็จ!")).catch(e => alert(e.message));
-    };
+    window.delHis = (k) => remove(ref(db, `users/${auth.currentUser.uid}/history/${k}`));
+    window.delPlan = (date, k) => remove(ref(db, `users/${auth.currentUser.uid}/plans/${date}/${k}`));
+    window.togglePlan = (date, k, s) => update(ref(db, `users/${auth.currentUser.uid}/plans/${date}/${k}`), { status: s==='done'?'pending':'done' });
+    document.getElementById('btnLogin').onclick = () => signInWithEmailAndPassword(auth, email.value, password.value).catch(e => alert("เข้าสู่ระบบไม่สำเร็จ"));
+    document.getElementById('btnSignUp').onclick = () => createUserWithEmailAndPassword(auth, email.value, password.value).then(() => alert("สำเร็จ!")).catch(e => alert(e.message));
     document.getElementById('btnLogout').onclick = () => signOut(auth);
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
