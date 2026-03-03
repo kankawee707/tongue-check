@@ -3,120 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TongueCheck Smart AI v2.0</title>
+    <title>TongueCheck Pro | AI Health Assistant</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Sarabun:wght@300;400;700&display=swap" rel="stylesheet">
 
     <style>
-        :root { --p-blue: #0056b3; --a-yellow: #ffc107; --bg: #f0f2f5; }
-        body { font-family: 'Sarabun', sans-serif; background-color: var(--bg); }
-        .navbar { background: linear-gradient(90deg, var(--p-blue), #003d80) !important; border-bottom: 4px solid var(--a-yellow); }
-        .card { border-radius: 25px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
-        .menu-card { cursor: pointer; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); background: white; border-radius: 30px !important; overflow: hidden; position: relative; }
-        .menu-card:hover { transform: translateY(-12px); box-shadow: 0 20px 40px rgba(0,0,0,0.15) !important; }
-        .btn-round { border-radius: 50px; font-weight: 700; padding: 12px 30px; transition: 0.3s; }
+        :root { --primary: #0062ff; --secondary: #7c4dff; --accent: #ffc107; --bg: #f8faff; --card-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+        body { font-family: 'Sarabun', 'Plus Jakarta Sans', sans-serif; background-color: var(--bg); color: #2d3436; }
+        .glass-nav { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .main-card { border-radius: 30px; border: none; box-shadow: var(--card-shadow); background: white; transition: 0.3s ease; }
+        .btn-gradient { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border: none; border-radius: 50px; font-weight: 700; padding: 12px 30px; }
+        .btn-gradient:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,98,255,0.4); color: white; }
         
-        /* Smart Chatbot v2.0 */
-        #chat-btn { position: fixed; bottom: 25px; right: 25px; width: 70px; height: 70px; border-radius: 50%; z-index: 1000; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 35px; box-shadow: 0 8px 25px rgba(0,86,179,0.4); background: var(--p-blue); color: white; border: none; }
-        #chat-window { position: fixed; bottom: 110px; right: 25px; width: 350px; height: 500px; z-index: 1000; display: none; flex-direction: column; border-radius: 25px; overflow: hidden; background: white; border: 1px solid #eee; box-shadow: 0 15px 50px rgba(0,0,0,0.2); }
-        #chat-header { background: var(--p-blue); color: white; padding: 18px; display: flex; justify-content: space-between; align-items: center; }
-        #chat-msgs { flex-grow: 1; overflow-y: auto; padding: 20px; background: #f9f9f9; display: flex; flex-direction: column; gap: 10px; }
-        .msg { padding: 12px 16px; border-radius: 18px; font-size: 0.95rem; line-height: 1.4; max-width: 80%; animation: fadeIn 0.3s ease; }
-        .ai-msg { background: white; color: #333; align-self: flex-start; border-bottom-left-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .user-msg { background: var(--p-blue); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
-        .typing { font-style: italic; color: #999; font-size: 0.8rem; margin-bottom: 10px; }
+        /* Scanner UI */
+        #video-wrap { position: relative; width: 100%; max-width: 450px; border-radius: 35px; overflow: hidden; border: 8px solid white; box-shadow: 0 20px 40px rgba(0,0,0,0.15); margin: auto; }
+        #video { width: 100%; background: #000; transform: scaleX(-1); transition: 0.5s; }
+        #video.back-cam { transform: scaleX(1); }
+        .scan-anim { position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: var(--accent); box-shadow: 0 0 20px var(--accent); animation: moveScan 2.5s infinite linear; z-index: 10; }
+        @keyframes moveScan { 0% { top: 10%; } 50% { top: 90%; } 100% { top: 10%; } }
 
-        /* Camera Scanner */
-        #video-wrap { position: relative; border-radius: 25px; overflow: hidden; border: 8px solid white; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        #video { width: 100%; height: auto; display: block; }
-        .scan-line { position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: var(--a-yellow); box-shadow: 0 0 15px var(--a-yellow); animation: scanning 2s infinite linear; }
-        @keyframes scanning { 0% { top: 0%; } 100% { top: 100%; } }
+        /* Menu Icons */
+        .menu-item { cursor: pointer; padding: 25px; border-radius: 25px; transition: 0.3s; background: white; text-align: center; border: 1px solid transparent; }
+        .menu-item:hover { transform: scale(1.05); border-color: var(--primary); box-shadow: var(--card-shadow); }
+        .menu-icon { font-size: 2.5rem; margin-bottom: 10px; display: block; }
+
+        /* History Cards */
+        .hist-card { border-left: 6px solid var(--primary); margin-bottom: 15px; border-radius: 15px !important; }
+        .hist-scan { border-color: var(--primary); }
+        .hist-plan { border-color: #00c853; }
     </style>
 </head>
 <body>
 
-<nav class="navbar navbar-dark shadow sticky-top">
+<nav class="navbar glass-nav sticky-top shadow-sm">
     <div class="container">
-        <a class="navbar-brand d-flex align-items-center" href="#" onclick="showHome()">
-            <span class="fs-2 me-2">👅</span> <strong>TongueCheck <span class="badge bg-warning text-dark" style="font-size: 0.5em;">SMART AI</span></strong>
-        </a>
-        <button id="btnLogout" class="btn btn-outline-light btn-sm btn-round d-none" onclick="logout()">ออกจากระบบ</button>
+        <span class="navbar-brand fw-800 text-primary" onclick="location.reload()" style="cursor:pointer">
+            <i class="bi bi-shield-plus me-2"></i>TongueCheck <span class="text-dark">PRO</span>
+        </span>
+        <div id="userNav" class="d-none">
+            <button class="btn btn-outline-danger btn-sm rounded-pill" onclick="logout()">
+                <i class="bi bi-box-arrow-right"></i> ออกจากระบบ
+            </button>
+        </div>
     </div>
 </nav>
 
 <div class="container py-4">
 
-    <div id="authSection" class="row justify-content-center pt-5">
+    <div id="authSection" class="row justify-content-center py-5">
         <div class="col-md-5">
-            <div class="card p-5 text-center shadow-lg animate__animated animate__zoomIn">
-                <h3 class="fw-bold mb-4">ยินดีต้อนรับ</h3>
-                <input type="email" id="email" class="form-control mb-3 btn-round" placeholder="อีเมล">
-                <input type="password" id="password" class="form-control mb-4 btn-round" placeholder="รหัสผ่าน">
-                <button class="btn btn-primary w-100 mb-2 btn-round py-3" onclick="login()">เข้าสู่ระบบ</button>
-                <button class="btn btn-outline-secondary w-100 btn-round" onclick="signup()">สมัครสมาชิกใหม่</button>
+            <div class="main-card p-5 animate__animated animate__fadeInUp">
+                <div class="text-center mb-4">
+                    <h2 class="fw-800">ยินดีต้อนรับสู่ AI หมอลิ้น</h2>
+                    <p class="text-muted">ดูแลสุขภาพง่ายๆ ด้วยปลายนิ้ว</p>
+                </div>
+                <div id="authErr" class="alert alert-danger d-none animate__animated animate__shakeX"></div>
+                <div class="form-floating mb-3">
+                    <input type="email" id="email" class="form-control rounded-pill px-4" placeholder="name@example.com">
+                    <label class="px-4">อีเมลของคุณ</label>
+                </div>
+                <div class="form-floating mb-4">
+                    <input type="password" id="password" class="form-control rounded-pill px-4" placeholder="Password">
+                    <label class="px-4">รหัสผ่าน</label>
+                </div>
+                <button class="btn btn-gradient w-100 mb-3 shadow" onclick="authAction('login')">เข้าสู่ระบบ</button>
+                <button class="btn btn-link w-100 text-decoration-none text-muted" onclick="authAction('signup')">ยังไม่มีบัญชี? สมัครสมาชิกใหม่</button>
             </div>
         </div>
     </div>
 
     <div id="mainSection" class="d-none">
+        
         <div id="homePage" class="animate__animated animate__fadeIn">
+            <div class="row mb-5 text-center">
+                <div class="col-12">
+                    <h1 class="fw-800 mb-2">สวัสดีครับ! สุขภาพลิ้นวันนี้เป็นอย่างไร?</h1>
+                    <p class="text-muted">เลือกฟังก์ชันที่คุณต้องการใช้งานด้านล่าง</p>
+                </div>
+            </div>
             <div class="row g-4 justify-content-center">
-                <div class="col-6 col-md-4"><div class="card menu-card p-4" onclick="showPage('scan-tab')"><h3>📸</h3><h6 class="fw-bold">วิเคราะห์ลิ้นด้วย AI</h6></div></div>
-                <div class="col-6 col-md-4"><div class="card menu-card p-4" onclick="showPage('plan-tab')"><h3>📅</h3><h6 class="fw-bold">แผนดูแลสุขภาพ</h6></div></div>
-                <div class="col-6 col-md-4"><div class="card menu-card p-4" onclick="showPage('chart-tab')"><h3>📊</h3><h6 class="fw-bold">วิเคราะห์สถิติ</h6></div></div>
-                <div class="col-6 col-md-4"><div class="card menu-card p-4" onclick="showPage('history-tab')"><h3>⏳</h3><h6 class="fw-bold">ประวัติย้อนหลัง</h6></div></div>
+                <div class="col-6 col-md-3">
+                    <div class="menu-item main-card" onclick="openPage('scan-view')">
+                        <i class="bi bi-camera-fill menu-icon text-primary"></i>
+                        <span class="fw-bold">วิเคราะห์ลิ้น</span>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="menu-item main-card" onclick="openPage('plan-view')">
+                        <i class="bi bi-calendar-check-fill menu-icon text-success"></i>
+                        <span class="fw-bold">แพลนเนอร์</span>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="menu-item main-card" onclick="openPage('history-view')">
+                        <i class="bi bi-clock-history menu-icon text-secondary"></i>
+                        <span class="fw-bold">ประวัติบันทึก</span>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div id="pageContent" class="d-none mt-3">
-            <button class="btn btn-light btn-round mb-4 shadow-sm" onclick="showHome()">⬅️ ย้อนกลับ</button>
-            
-            <div class="content-view d-none" id="scan-tab">
+        <div id="pageContainer" class="d-none">
+            <button class="btn btn-white btn-sm rounded-pill shadow-sm mb-4 px-3" onclick="goHome()">
+                <i class="bi bi-arrow-left"></i> กลับหน้าหลัก
+            </button>
+
+            <div id="scan-view" class="sub-view d-none">
                 <div class="row justify-content-center">
-                    <div class="col-md-6 text-center">
-                        <div id="video-wrap">
-                            <video id="video" autoplay playsinline></video>
-                            <div class="scan-line"></div>
+                    <div class="col-md-8">
+                        <div class="main-card p-4 text-center">
+                            <div id="video-wrap">
+                                <video id="video" autoplay playsinline></video>
+                                <div id="scanLine" class="scan-anim d-none"></div>
+                            </div>
+                            <div class="d-flex justify-content-center gap-2 mt-4">
+                                <button class="btn btn-light rounded-pill" onclick="toggleCam()">
+                                    <i class="bi bi-arrow-repeat"></i> สลับกล้อง
+                                </button>
+                                <button class="btn btn-gradient px-5 shadow-lg" onclick="startWinnerAnalysis()">
+                                    <i class="bi bi-magic"></i> เริ่มวิเคราะห์เดี๋ยวนี้
+                                </button>
+                            </div>
+                            <canvas id="canvas" class="d-none" width="450" height="350"></canvas>
+                            <div id="winnerResult" class="mt-4"></div>
                         </div>
-                        <button class="btn btn-danger btn-round mt-4 px-5 shadow-lg animate__animated animate__pulse animate__infinite" onclick="smartAnalyze()">วิเคราะห์เดี๋ยวนี้</button>
-                        <canvas id="canvas" class="d-none" width="400" height="300"></canvas>
-                        <div id="resultArea" class="mt-4 text-start"></div>
                     </div>
                 </div>
             </div>
 
-            <div class="content-view d-none" id="plan-tab">
-                <div class="card p-4"><h5>📅 แผนดูแลลิ้นรายวัน</h5><div class="input-group mb-3"><input type="text" id="pIn" class="form-control"><button class="btn btn-primary" onclick="addP()">เพิ่ม</button></div><ul id="pList" class="list-group"></ul></div>
+            <div id="plan-view" class="sub-view d-none">
+                <div class="main-card p-4">
+                    <h4 class="fw-800 mb-4 text-success"><i class="bi bi-calendar-plus me-2"></i>ตารางการดูแลส่วนตัว</h4>
+                    <div class="input-group mb-4 shadow-sm rounded-pill overflow-hidden">
+                        <input type="text" id="taskIn" class="form-control border-0 ps-4" placeholder="เพิ่มแผนใหม่ เช่น ดื่มน้ำอุ่น 1 แก้ว...">
+                        <button class="btn btn-success px-4" onclick="addPlannerTask()">เพิ่มแผนงาน</button>
+                    </div>
+                    <ul id="taskList" class="list-group list-group-flush"></ul>
+                </div>
             </div>
 
-            <div class="content-view d-none" id="chart-tab">
-                <div class="card p-4"><h5>📊 แนวโน้มสุขภาพของคุณ</h5><canvas id="tChart"></canvas></div>
+            <div id="history-view" class="sub-view d-none">
+                <div class="main-card p-4">
+                    <h4 class="fw-800 mb-4 text-secondary"><i class="bi bi-activity me-2"></i>ประวัติกิจกรรมย้อนหลัง</h4>
+                    <div id="historyFeed"></div>
+                </div>
             </div>
 
-            <div class="content-view d-none" id="history-tab">
-                <div class="card p-4"><h5>⏳ ประวัติทั้งหมด</h5><div id="hList"></div></div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<button id="chat-btn" onclick="toggleChat()">🤖</button>
-<div id="chat-window" class="animate__animated">
-    <div id="chat-header">
-        <span class="fw-bold">👅 Smart Bot AI <small>(v2.0)</small></span>
-        <button class="btn-close btn-close-white" onclick="toggleChat()"></button>
-    </div>
-    <div id="chat-msgs">
-        <div class="msg ai-msg shadow-sm">สวัสดีครับ! ผมคือ AI รุ่นอัปเกรด คุณสามารถถามคำถามเกี่ยวกับสุขภาพลิ้นได้ละเอียดขึ้น หรือปรึกษาเรื่องการดูแลตัวเองได้เลยครับ</div>
-    </div>
-    <div id="typing-indicator" class="px-3 d-none"><div class="typing">AI กำลังประมวลผล...</div></div>
-    <div class="p-3 border-top bg-white">
-        <div class="input-group">
-            <input type="text" id="chatIn" class="form-control border-0 bg-light btn-round" style="border-radius: 20px 0 0 20px !important;" placeholder="ถามได้ทุกเรื่อง..." onkeypress="if(event.key==='Enter') smartChat()">
-            <button class="btn btn-primary btn-round" style="border-radius: 0 20px 20px 0 !important;" onclick="smartChat()">ส่ง</button>
         </div>
     </div>
 </div>
@@ -124,8 +159,9 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, push, onValue, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+    // Your Config
     const firebaseConfig = {
         apiKey: "AIzaSyAT_a_mJqgA4BpJAHsdnFG8DbitAWUoLko",
         authDomain: "tonguecheck.firebaseapp.com",
@@ -133,159 +169,162 @@
         projectId: "tonguecheck",
         storageBucket: "tonguecheck.firebasestorage.app",
         messagingSenderId: "278288057340",
-        appId: "1:278288057340:web:dcc14f73fa8806c0176879",
-        measurementId: "G-0DTTRQMXCK"
+        appId: "1:278288057340:web:dcc14f73fa8806c0176879"
     };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    // --- SMART BRAIN: Knowledge Base with Logical Keywords ---
-    const aiBrain = [
-        { keys: ["ฝ้า", "ขาว", "คราบ"], ans: "ฝ้าขาว (White Coating) ส่วนใหญ่เกิดจากแบคทีเรียและเซลล์ที่ตายแล้วสะสมตัว แนะนำให้ใช้ที่ขูดลิ้นและดื่มน้ำให้ได้วันละ 2-3 ลิตรครับ หากเช็ดไม่ออกอาจเป็นเชื้อรา ควรพบแพทย์" },
-        { keys: ["แดง", "เจ็บ", "ร้อนใน"], ans: "ลิ้นแดงจัดอาจเกิดจากภาวะ 'Glossitis' หรือการอักเสบ มักมาจากการขาดวิตามิน B12, ธาตุเหล็ก หรือร่างกายร้อนใน แนะนำให้เลี่ยงอาหารเผ็ดและทานผักใบเขียวครับ" },
-        { keys: ["แปรง", "ความสะอาด", "ล้าง"], ans: "การแปรงลิ้นที่ดีที่สุดคือใช้แปรงหรือที่ขูดลิ้น ลากจากโคนลิ้นมาปลายลิ้น 3-4 ครั้งเบาๆ ทำทุกเช้า-เย็น จะช่วยลดกลิ่นปากได้ถึง 75% ครับ" },
-        { keys: ["ปกติ", "สุขภาพดี"], ans: "ลิ้นที่สุขภาพดีจะมีสีชมพูอ่อนเรื่อๆ พื้นผิวมีตุ่มเล็กๆ (Papillae) กระจายตัวสม่ำเสมอ และไม่มีคราบหนาครับ" },
-        { keys: ["ขอบคุณ", "แต๊ง", "ดีมาก"], ans: "ยินดีเสมอครับ! อย่าลืมตรวจลิ้นเป็นประจำเพื่อเช็กสุขภาพร่างกายนะครับ" }
-    ];
+    let stream = null;
+    let mode = "user";
 
-    // --- Smart Navigation ---
-    window.showPage = (id) => {
-        document.getElementById('homePage').classList.add('d-none');
-        document.getElementById('pageContent').classList.remove('d-none');
-        document.querySelectorAll('.content-view').forEach(v => v.classList.add('d-none'));
-        document.getElementById(id).classList.remove('d-none');
-        if(id === 'scan-tab') startCam();
-        if(id === 'chart-tab') drawChart();
-    };
-    window.showHome = () => {
-        document.getElementById('homePage').classList.remove('d-none');
-        document.getElementById('pageContent').classList.add('d-none');
-    };
-
-    // --- Smart Chatbot v2.0 Logic ---
-    window.toggleChat = () => {
-        const win = document.getElementById('chat-window');
-        win.style.display = (win.style.display === 'flex') ? 'none' : 'flex';
-    };
-
-    window.smartChat = () => {
-        const input = document.getElementById('chatIn').value.toLowerCase();
-        const box = document.getElementById('chat-msgs');
-        const indicator = document.getElementById('typing-indicator');
-        if(!input) return;
-
-        box.innerHTML += `<div class="msg user-msg shadow-sm">${input}</div>`;
-        document.getElementById('chatIn').value = "";
-        box.scrollTop = box.scrollHeight;
-
-        indicator.classList.remove('d-none');
-
-        // AI Thinking Simulation
-        setTimeout(() => {
-            indicator.classList.add('d-none');
-            let response = "ผมยังไม่ค่อยเข้าใจหัวข้อนี้ ลองถามเกี่ยวกับ 'สีลิ้น', 'ฝ้าขาว' หรือ 'การดูแลรักษา' ดูนะครับ หรือลองอธิบายอาการให้ละเอียดขึ้นอีกนิด";
-            
-            // Fuzzy Keyword Matching
-            for(let item of aiBrain) {
-                if(item.keys.some(k => input.includes(k))) {
-                    response = item.ans;
-                    break;
-                }
-            }
-
-            box.innerHTML += `<div class="msg ai-msg shadow-sm animate__animated animate__fadeInUp">${response}</div>`;
-            box.scrollTop = box.scrollHeight;
-        }, 800);
-    };
-
-    // --- Advanced Image Analysis (Smart Scanning) ---
-    async function startCam() {
+    // --- Authentication Engine ---
+    window.authAction = async (type) => {
+        const e = document.getElementById('email').value;
+        const p = document.getElementById('password').value;
+        const errBox = document.getElementById('authErr');
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
-            document.getElementById('video').srcObject = stream;
-        } catch (e) { alert("กรุณาเปิดการใช้งานกล้อง"); }
-    }
-
-    window.smartAnalyze = () => {
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        
-        const pixels = ctx.getImageData(150, 100, 100, 100).data;
-        let r=0, g=0, b=0;
-        for(let i=0; i<pixels.length; i+=4) { r+=pixels[i]; g+=pixels[i+1]; b+=pixels[i+2]; }
-        const count = pixels.length/4;
-        const ar=r/count, ag=g/count, ab=b/count;
-
-        let res = { title: "ลิ้นปกติ", color: "success", text: "สีชมพูสุขภาพดี รักษาวินัยแบบนี้ต่อไปนะครับ" };
-        
-        // Logical Analysis v2.0
-        if(ag > 165 && (ar+ag+ab)/3 > 170) {
-            res = { title: "พบฝ้าขาวหนา", color: "warning", text: "ตรวจพบสีขาวสะสมหนาเกินไป ควรใช้ที่ขูดลิ้นและดื่มน้ำเพิ่ม" };
-        } else if (ar > 200 && ag < 140) {
-            res = { title: "ลิ้นแดงผิดปกติ", color: "danger", text: "ลิ้นมีสีแดงเข้มเกินไป อาจเกิดจากการอักเสบหรือร้อนใน" };
+            if(type === 'login') await signInWithEmailAndPassword(auth, e, p);
+            else await createUserWithEmailAndPassword(auth, e, p);
+            errBox.classList.add('d-none');
+        } catch (err) {
+            errBox.innerText = "❌ เกิดข้อผิดพลาด: โปรดตรวจสอบอีเมลและรหัสผ่าน";
+            errBox.classList.remove('d-none');
         }
-
-        document.getElementById('resultArea').innerHTML = `
-            <div class="card p-3 border-start border-5 border-${res.color} animate__animated animate__fadeIn">
-                <h5 class="fw-bold text-${res.color}">${res.title}</h5>
-                <p class="mb-0 text-muted">${res.text}</p>
-                <small class="mt-2 d-block text-secondary">วิเคราะห์จากค่า RGB: (${Math.round(ar)}, ${Math.round(ag)}, ${Math.round(ab)})</small>
-            </div>
-        `;
-        
-        if(auth.currentUser) push(ref(db, `users/${auth.currentUser.uid}/history`), { date: new Date().toLocaleDateString('th-TH'), score: ag, status: res.title });
-    };
-
-    // --- Firebase Auth & Data ---
-    window.login = () => signInWithEmailAndPassword(auth, email.value, password.value);
-    window.signup = () => createUserWithEmailAndPassword(auth, email.value, password.value);
+    }
     window.logout = () => signOut(auth);
 
     onAuthStateChanged(auth, (user) => {
         if(user) {
             document.getElementById('authSection').classList.add('d-none');
             document.getElementById('mainSection').classList.remove('d-none');
-            document.getElementById('btnLogout').classList.remove('d-none');
-            loadData();
+            document.getElementById('userNav').classList.remove('d-none');
+            loadGlobalData();
         } else {
             document.getElementById('authSection').classList.remove('d-none');
             document.getElementById('mainSection').classList.add('d-none');
-            document.getElementById('btnLogout').classList.add('d-none');
+            document.getElementById('userNav').classList.add('d-none');
         }
     });
 
-    function loadData() {
-        onValue(ref(db, `users/${auth.currentUser.uid}`), (s) => {
-            const data = s.val();
-            const pL = document.getElementById('pList'); pL.innerHTML = "";
-            if(data?.plans) Object.entries(data.plans).forEach(([k, v]) => {
-                pL.innerHTML += `<li class="list-group-item d-flex justify-content-between"><span>✅ ${v.task}</span><button class="btn btn-sm text-danger" onclick="rem('plans/${k}')">ลบ</button></li>`;
+    // --- Navigation ---
+    window.openPage = (id) => {
+        document.getElementById('homePage').classList.add('d-none');
+        document.getElementById('pageContainer').classList.remove('d-none');
+        document.querySelectorAll('.sub-view').forEach(v => v.classList.add('d-none'));
+        document.getElementById(id).classList.remove('d-none');
+        if(id === 'scan-view') startVideo();
+    }
+    window.goHome = () => {
+        document.getElementById('homePage').classList.remove('d-none');
+        document.getElementById('pageContainer').classList.add('d-none');
+        if(stream) stream.getTracks().forEach(t => t.stop());
+    }
+
+    // --- High-End AI Analysis & Behavior Logic ---
+    async function startVideo() {
+        if(stream) stream.getTracks().forEach(t => t.stop());
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: mode } });
+        const v = document.getElementById('video');
+        v.srcObject = stream;
+        v.className = mode === "user" ? "" : "back-cam";
+    }
+    window.toggleCam = () => { mode = mode === "user" ? "environment" : "user"; startVideo(); }
+
+    window.startWinnerAnalysis = () => {
+        document.getElementById('scanLine').classList.remove('d-none');
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        setTimeout(() => {
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const data = ctx.getImageData(150, 100, 150, 150).data;
+            let r=0, g=0, b=0;
+            for(let i=0; i<data.length; i+=4) { r+=data[i]; g+=data[i+1]; b+=data[i+2]; }
+            const avgR = r/(data.length/4), avgG = g/(data.length/4), avgB = b/(data.length/4);
+
+            let res = { type: "สดใส (Healthy Pink)", color: "primary", behavior: "ดูแลสุขภาพเยี่ยม", advice: "ลิ้นสีชมพูแสดงถึงระบบหมุนเวียนเลือดและพักผ่อนที่ยอดเยี่ยม" };
+            
+            if(avgG > 175) res = { type: "สายรีบ (Coated)", color: "warning", behavior: "สายกินจุ/ปาร์ตี้", advice: "พบคราบฝ้าขาวสะสม ควรใช้ที่ขูดลิ้นและดื่มน้ำเพิ่มครับ" };
+            else if(avgR > 215) res = { type: "ร้อนแรง (Glossitis)", color: "danger", behavior: "สายเผ็ด/พักน้อย", advice: "ลิ้นแดงผิดปกติ มักเกิดจากอาการร้อนในหรือร่างกายขาดวิตามินบี" };
+            else if(avgR < 160 && avgG < 160) res = { type: "อ่อนแรง (Pale)", color: "info", behavior: "สายอดนอน/ซีด", advice: "ลิ้นดูซีดกว่าปกติ อาจเกิดจากสภาวะเลือดจางหรือพักผ่อนน้อย" };
+
+            document.getElementById('winnerResult').innerHTML = `
+                <div class="main-card p-4 border-top border-5 border-${res.color} animate__animated animate__zoomIn shadow">
+                    <div class="d-flex justify-content-between mb-2">
+                        <h4 class="fw-800 text-${res.color}">${res.type}</h4>
+                        <span class="badge bg-${res.color} rounded-pill">${res.behavior}</span>
+                    </div>
+                    <p class="mb-0 text-muted">${res.advice}</p>
+                </div>
+            `;
+            document.getElementById('scanLine').classList.add('d-none');
+
+            // AUTO SAVE EVERYTHING
+            const histRef = ref(db, `users/${auth.currentUser.uid}/history`);
+            push(histRef, {
+                type: 'ANALYSIS',
+                title: res.type,
+                detail: `พฤติกรรม: ${res.behavior} | ${res.advice}`,
+                style: 'hist-scan',
+                time: new Date().toLocaleString('th-TH')
             });
-            const hL = document.getElementById('hList'); hL.innerHTML = "";
-            if(data?.history) Object.values(data.history).reverse().forEach(v => {
-                hL.innerHTML += `<div class="p-2 border-bottom small">${v.date} - <b>${v.status}</b></div>`;
+        }, 1500);
+    }
+
+    // --- Planner & History Engine ---
+    window.addPlannerTask = () => {
+        const t = document.getElementById('taskIn').value;
+        if(!t) return;
+        const planRef = ref(db, `users/${auth.currentUser.uid}/plans`);
+        push(planRef, { task: t });
+        
+        // Log to history
+        push(ref(db, `users/${auth.currentUser.uid}/history`), {
+            type: 'PLANNER',
+            title: 'อัปเดตแผนสุขภาพ',
+            detail: `คุณได้เพิ่มกิจกรรม: ${t}`,
+            style: 'hist-plan',
+            time: new Date().toLocaleString('th-TH')
+        });
+        document.getElementById('taskIn').value = "";
+    }
+
+    function loadGlobalData() {
+        const userRef = ref(db, `users/${auth.currentUser.uid}`);
+        onValue(userRef, (snap) => {
+            const data = snap.val();
+            
+            // Render Planner
+            const tList = document.getElementById('taskList'); tList.innerHTML = "";
+            if(data?.plans) Object.entries(data.plans).forEach(([id, p]) => {
+                tList.innerHTML += `<li class="list-group-item d-flex justify-content-between align-items-center bg-transparent border-0 px-0">
+                    <span class="fw-bold">✨ ${p.task}</span>
+                    <button class="btn btn-sm text-danger" onclick="removeItem('plans/${id}')"><i class="bi bi-trash"></i></button>
+                </li>`;
             });
+
+            // Render History
+            const hList = document.getElementById('historyFeed'); hList.innerHTML = "";
+            if(data?.history) {
+                Object.entries(data.history).reverse().forEach(([id, h]) => {
+                    hList.innerHTML += `
+                        <div class="card p-3 mb-3 main-card hist-card ${h.style}">
+                            <div class="d-flex justify-content-between mb-1">
+                                <small class="text-primary fw-bold">${h.type}</small>
+                                <small class="text-muted">${h.time}</small>
+                            </div>
+                            <div class="fw-800">${h.title}</div>
+                            <div class="text-muted small">${h.detail}</div>
+                        </div>`;
+                });
+            } else hList.innerHTML = "<p class='text-center text-muted py-5'>ยังไม่มีประวัติกิจกรรม</p>";
         });
     }
 
-    window.addP = () => { const t = document.getElementById('pIn').value; if(t) { push(ref(db, `users/${auth.currentUser.uid}/plans`), { task: t }); document.getElementById('pIn').value = ""; }};
-    window.rem = (path) => remove(ref(db, `users/${auth.currentUser.uid}/${path}`));
-
-    function drawChart() {
-        onValue(ref(db, `users/${auth.currentUser.uid}/history`), (s) => {
-            const data = s.val(); if(!data) return;
-            const labels = Object.values(data).slice(-7).map(v => v.date);
-            const scores = Object.values(data).slice(-7).map(v => v.score);
-            new Chart(document.getElementById('tChart'), {
-                type: 'line',
-                data: { labels, datasets: [{ label: 'ระดับความขาว', data: scores, borderColor: '#0056b3', fill: true, backgroundColor: 'rgba(0,86,179,0.1)', tension: 0.4 }] }
-            });
-        });
-    }
+    window.removeItem = (path) => remove(ref(db, `users/${auth.currentUser.uid}/${path}`));
 </script>
 </body>
 </html>
