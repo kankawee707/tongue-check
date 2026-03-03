@@ -3,128 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TongueCheck | ตรวจลิ้นง่ายๆ เพื่อคุณ</title>
+    <title>TongueCheck Pro - AI & History Tracker</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&display=swap" rel="stylesheet">
 
     <style>
-        :root { 
-            --blue: #0056b3; 
-            --red: #d9534f; 
-            --yellow: #ffc107; 
-            --bg-soft: #f8faff;
-        }
-        body { font-family: 'Sarabun', sans-serif; background: var(--bg-soft); color: #333; }
-        .fw-800 { font-weight: 800; }
+        :root { --p-blue: #0056b3; --a-yellow: #ffc107; --bg: #f4f7f6; }
+        body { font-family: 'Sarabun', sans-serif; background-color: var(--bg); }
+        .navbar { background: var(--p-blue) !important; border-bottom: 4px solid var(--a-yellow); }
+        .card { border-radius: 20px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.05); transition: 0.3s; }
+        .btn-round { border-radius: 50px; font-weight: bold; padding: 10px 25px; }
         
-        /* การ์ดและปุ่มที่เป็นมิตร (Friendly UI) */
-        .main-card { background: #fff; border-radius: 35px; border: none; box-shadow: 0 15px 35px rgba(0,0,0,0.05); }
-        .btn-round { border-radius: 50px; padding: 15px 25px; font-weight: 700; border: none; transition: 0.3s; }
-        .btn-blue { background: var(--blue); color: white; }
-        .btn-red { background: var(--red); color: white; }
-        .btn-yellow { background: var(--yellow); color: #000; }
-        .btn-round:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        /* Camera & Analysis UI */
+        #video-container { position: relative; width: 100%; max-width: 450px; margin: auto; border-radius: 25px; overflow: hidden; border: 6px solid white; box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+        #video { width: 100%; background: #000; transform: scaleX(-1); }
+        #video.back-cam { transform: scaleX(1); }
+        .scan-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 160px; height: 200px; border: 3px dashed var(--a-yellow); border-radius: 50%; pointer-events: none; opacity: 0.7; }
 
-        /* ระบบสแกน */
-        #video-wrap { position: relative; border-radius: 30px; border: 8px solid white; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        video { width: 100%; transform: scaleX(-1); background: #000; }
-        .scan-line { position: absolute; width: 100%; height: 5px; background: var(--red); top: 0; animation: scan 2s infinite linear; }
-        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
-
-        /* แชท TARS */
-        .chat-box { height: 350px; overflow-y: auto; background: #fdfdfd; border-radius: 20px; padding: 15px; border: 1px solid #eee; }
-        .msg-ai { background: #eef2f7; border-radius: 15px 15px 15px 0; padding: 10px 15px; margin-bottom: 10px; max-width: 85%; align-self: flex-start; }
-        .msg-user { background: var(--blue); color: white; border-radius: 15px 15px 0 15px; padding: 10px 15px; margin-bottom: 10px; max-width: 85%; align-self: flex-end; }
+        /* History Badge */
+        .badge-scan { background: #e3f2fd; color: #0d47a1; border: 1px solid #bbdefb; }
+        .badge-plan { background: #f1f8e9; color: #33691e; border: 1px solid #dcedc8; }
     </style>
 </head>
 <body>
 
-<nav class="navbar navbar-light bg-white shadow-sm sticky-top">
-    <div class="container justify-content-center">
-        <a class="navbar-brand fw-800 d-flex align-items-center" href="#" onclick="location.reload()">
-            <img src="https://img2.pic.in.th/tongueCheckf6775f29fc4e7a51.jpg" width="40" height="40" class="rounded-circle me-2">
-            <span style="color: var(--blue);">Tongue</span><span style="color: var(--red);">Check</span>
-        </a>
+<nav class="navbar navbar-dark shadow sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="#" onclick="showHome()">👅 TongueCheck Pro</a>
+        <button id="btnLogout" class="btn btn-outline-light btn-sm btn-round d-none" onclick="logout()">ออกจากระบบ</button>
     </div>
 </nav>
 
 <div class="container py-4">
 
-    <div id="authSection" class="row justify-content-center py-5 animate__animated animate__fadeIn">
-        <div class="col-md-5 text-center">
-            <div class="main-card p-5">
-                <img src="https://img2.pic.in.th/tongueCheckf6775f29fc4e7a51.jpg" class="mb-4 animate__animated animate__pulse animate__infinite" style="width: 120px; border-radius: 25px;">
-                <h2 class="fw-800 text-primary">สวัสดีครับ!</h2>
-                <p class="text-muted mb-4">ยินดีต้อนรับสู่แอปตรวจสุขภาพลิ้นเพื่อคุณ</p>
-                
-                <div class="form-floating mb-3">
-                    <input type="email" id="email" class="form-control border-0 bg-light rounded-4 px-4" placeholder="Email">
-                    <label class="ps-4">อีเมล</label>
-                </div>
-                <div class="form-floating mb-4">
-                    <input type="password" id="password" class="form-control border-0 bg-light rounded-4 px-4" placeholder="Password">
-                    <label class="ps-4">รหัสผ่าน</label>
-                </div>
-
-                <button class="btn-round btn-blue w-100 mb-3 py-3" onclick="handleAuth('login')">เริ่มใช้งานกันเลย! 🚀</button>
-                <button class="btn btn-link text-decoration-none text-muted small" onclick="handleAuth('signup')">ลงทะเบียนสมาชิกใหม่</button>
-                
-                <div class="mt-4 pt-4 border-top">
-                    <div class="d-flex align-items-center justify-content-center">
-                        <span class="fs-2 me-2">👨‍⚕️</span>
-                        <div class="text-start"><small class="fw-bold d-block">TARS AI</small><small class="text-muted">ผู้ช่วยคุณหมอพร้อมดูแล 24 ชม.</small></div>
-                    </div>
-                </div>
+    <div id="authSection" class="row justify-content-center pt-5">
+        <div class="col-md-5">
+            <div class="card p-5 text-center shadow-lg animate__animated animate__fadeIn">
+                <h3 class="fw-bold mb-4 text-primary">ลงชื่อเข้าใช้งาน</h3>
+                <div id="authError" class="alert alert-danger d-none small"></div>
+                <input type="email" id="email" class="form-control mb-3 btn-round" placeholder="อีเมลของคุณ">
+                <input type="password" id="password" class="form-control mb-4 btn-round" placeholder="รหัสผ่าน">
+                <button class="btn btn-primary w-100 mb-2 btn-round py-3" onclick="handleAuth('login')">เข้าสู่ระบบ</button>
+                <button class="btn btn-outline-secondary w-100 btn-round" onclick="handleAuth('signup')">สมัครสมาชิกใหม่</button>
             </div>
         </div>
     </div>
 
-    <div id="mainSection" class="d-none animate__animated animate__fadeIn">
-        <div id="homeView" class="text-center">
-            <h3 class="fw-800 mb-4">วันนี้คุณอยากให้หมอช่วยอะไรครับ?</h3>
-            <div class="row g-4 justify-content-center">
-                <div class="col-12"><button class="btn-round btn-red w-100 py-4 fs-4" onclick="openTab('scan-tab')"><i class="bi bi-camera-fill"></i> สแกนลิ้นตรวจโรค</button></div>
-                <div class="col-6"><button class="btn-round btn-blue w-100 py-3" onclick="openTab('chat-tab')"><i class="bi bi-robot"></i> ถาม TARS AI</button></div>
-                <div class="col-6"><button class="btn-round btn-yellow w-100 py-3" onclick="openTab('plan-tab')"><i class="bi bi-calendar-check"></i> แผนดูแลลิ้น</button></div>
-                <div class="col-12"><button class="btn btn-outline-secondary w-100 rounded-pill py-3 fw-bold" onclick="openTab('history-tab')"><i class="bi bi-clock-history"></i> ประวัติที่ผ่านมา</button></div>
+    <div id="mainSection" class="d-none">
+        <div id="homePage" class="animate__animated animate__fadeIn text-center">
+            <h2 class="fw-bold mb-4">ยินดีต้อนรับสู่ศูนย์ดูแลสุขภาพลิ้น</h2>
+            <div class="row g-3">
+                <div class="col-6 col-md-4"><div class="card p-4 shadow-sm" style="cursor:pointer" onclick="showPage('scan-tab')"><h3>📸</h3><b>สแกนลิ้น</b></div></div>
+                <div class="col-6 col-md-4"><div class="card p-4 shadow-sm" style="cursor:pointer" onclick="showPage('plan-tab')"><h3>📅</h3><b>แพลนเนอร์</b></div></div>
+                <div class="col-12 col-md-4"><div class="card p-4 shadow-sm" style="cursor:pointer" onclick="showPage('history-tab')"><h3>⏳</h3><b>ดูประวัติทั้งหมด</b></div></div>
             </div>
-            <button class="btn btn-sm btn-link mt-5 text-danger" onclick="logout()">ออกจากระบบ</button>
         </div>
 
-        <div id="subContainer" class="d-none">
-            <button class="btn btn-light rounded-pill mb-4 shadow-sm fw-bold" onclick="backHome()"><i class="bi bi-arrow-left"></i> กลับหน้าหลัก</button>
+        <div id="pageContent" class="d-none mt-3">
+            <button class="btn btn-light btn-round mb-4 shadow-sm" onclick="showHome()">⬅️ กลับเมนูหลัก</button>
 
-            <div id="scan-tab" class="sub-page d-none text-center">
-                <div class="main-card p-4">
-                    <h4 class="fw-800 text-danger mb-3">หน้าจอวิเคราะห์ลิ้น</h4>
-                    <div id="video-wrap" class="mb-4">
+            <div class="content-view d-none" id="scan-tab">
+                <div class="card p-3 text-center">
+                    <div id="video-container">
                         <video id="video" autoplay playsinline></video>
-                        <div id="scanLine" class="scan-line" style="display:none;"></div>
+                        <div class="scan-overlay"></div>
                     </div>
-                    <button class="btn-round btn-blue px-5" onclick="startAIAnalysis()">เริ่มสแกนตอนนี้</button>
-                    <div id="resBox" class="mt-4"></div>
+                    <div class="mt-3">
+                        <button class="btn btn-secondary btn-round mb-2" onclick="switchCamera()">🔄 สลับกล้องหน้า/หลัง</button><br>
+                        <button class="btn btn-danger btn-round px-5 py-3 shadow" onclick="startAIAnalysis()">🔬 วิเคราะห์ลิ้นเดี๋ยวนี้</button>
+                    </div>
+                    <canvas id="canvas" class="d-none" width="400" height="300"></canvas>
+                    <div id="resultOutput" class="mt-4"></div>
                 </div>
             </div>
 
-            <div id="chat-tab" class="sub-page d-none">
-                <div class="main-card p-4">
-                    <h4 class="fw-800 text-primary mb-3">ถาม-ตอบ กับ TARS AI</h4>
-                    <div id="chatBox" class="chat-box d-flex flex-column mb-3"></div>
-                    <div class="input-group">
-                        <input type="text" id="chatIn" class="form-control rounded-start-pill border-2" placeholder="พิมพ์ถามหมอตรงนี้...">
-                        <button class="btn-blue px-4 rounded-end-pill" onclick="askTARS()">ส่ง</button>
+            <div class="content-view d-none" id="plan-tab">
+                <div class="card p-4">
+                    <h5 class="fw-bold mb-3">📅 จัดการตารางสุขภาพ</h5>
+                    <div class="input-group mb-4 shadow-sm">
+                        <input type="text" id="planInput" class="form-control" placeholder="เช่น แปรงลิ้น, ดื่มน้ำ 8 แก้ว...">
+                        <button class="btn btn-primary px-4" onclick="addCustomPlan()">เพิ่มแผน</button>
                     </div>
+                    <ul id="planList" class="list-group list-group-flush"></ul>
                 </div>
             </div>
 
-            <div id="plan-tab" class="sub-page d-none text-center">
-                <div class="main-card p-4"><h4 class="fw-800 text-warning">แผนการดูแลของคุณ</h4><p class="mt-4">✨ ดื่มน้ำให้เพียงพอและแปรงลิ้นวันละ 2 ครั้ง</p></div>
-            </div>
-            <div id="history-tab" class="sub-page d-none text-center">
-                <div class="main-card p-4"><h4 class="fw-800 text-success">ประวัติเวชระเบียน</h4><div id="histFeed" class="mt-3"></div></div>
+            <div class="content-view d-none" id="history-tab">
+                <div class="card p-4">
+                    <h5 class="fw-bold mb-3 text-primary">⏳ บันทึกกิจกรรมและผลการตรวจ</h5>
+                    <div id="historyData">กำลังโหลดประวัติ...</div>
+                </div>
             </div>
         </div>
     </div>
@@ -135,7 +105,6 @@
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    // กำหนดค่า Firebase ของคุณที่นี่
     const firebaseConfig = {
         apiKey: "AIzaSyAT_a_mJqgA4BpJAHsdnFG8DbitAWUoLko",
         authDomain: "tonguecheck.firebaseapp.com",
@@ -150,406 +119,145 @@
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    let stream = null;
+    let currentStream = null;
+    let facingMode = "user";
 
-    // ระบบล็อกอิน
-    window.handleAuth = (type) => {
-        const e = document.getElementById('email').value, p = document.getElementById('password').value;
-        if(type === 'login') signInWithEmailAndPassword(auth, e, p).catch(err => alert("ข้อมูลไม่ถูกต้องครับ"));
-        else createUserWithEmailAndPassword(auth, e, p).then(() => alert("ลงทะเบียนสำเร็จ!"));
-    };
-    window.logout = () => signOut(auth);
-    onAuthStateChanged(auth, user => {
-        if(user) { 
-            document.getElementById('authSection').classList.add('d-none');
-            document.getElementById('mainSection').classList.remove('d-none');
-            fetchData(user.uid);
-        } else {
-            document.getElementById('authSection').classList.remove('d-none');
-            document.getElementById('mainSection').classList.add('d-none');
+    // --- Authentication ---
+    window.handleAuth = async (type) => {
+        const em = document.getElementById('email').value;
+        const pw = document.getElementById('password').value;
+        const err = document.getElementById('authError');
+        try {
+            if(type === 'login') await signInWithEmailAndPassword(auth, em, pw);
+            else await createUserWithEmailAndPassword(auth, em, pw);
+            err.classList.add('d-none');
+        } catch (e) {
+            err.innerText = "อีเมลหรือรหัสผ่านไม่ถูกต้อง หรือมีผู้ใช้นี้อยู่แล้ว";
+            err.classList.remove('d-none');
         }
-    });
-
-    // เมนูหลัก
-    window.openTab = (id) => {
-        document.getElementById('homeView').classList.add('d-none');
-        document.getElementById('subContainer').classList.remove('d-none');
-        document.querySelectorAll('.sub-page').forEach(p => p.classList.add('d-none'));
-        document.getElementById(id).classList.remove('d-none');
-        if(id === 'scan-tab') startCam();
-    };
-    window.backHome = () => {
-        document.getElementById('homeView').classList.remove('d-none');
-        document.getElementById('subContainer').classList.add('d-none');
-        stopCam();
-    };
-
-    // กล้องและการวิเคราะห์
-    async function startCam() {
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
-        document.getElementById('video').srcObject = stream;
-    }
-    function stopCam() { if(stream) stream.getTracks().forEach(t => t.stop()); }
-
-    window.startAIAnalysis = () => {
-        const line = document.getElementById('scanLine'); line.style.display = 'block';
-        setTimeout(() => {
-            line.style.display = 'none';
-            const results = [
-                { name: "ลิ้นอักเสบ (แดง)", code: "K14.0", color: "danger", detail: "ขาดวิตามินหรือทานของร้อนเกินไป" },
-                { name: "ลิ้นมีฝ้าขาว", code: "B37.0", color: "warning", detail: "สะสมของแบคทีเรียหรือเชื้อรา" }
-            ];
-            const res = results[Math.floor(Math.random()*results.length)];
-            document.getElementById('resBox').innerHTML = `<div class="alert alert-${res.color} animate__animated animate__zoomIn">
-                <h5 class="fw-800">${res.name}</h5><p class="small mb-0">${res.detail}</p></div>`;
-            
-            push(ref(db, `users/${auth.currentUser.uid}/history`), { title: res.name, time: new Date().toLocaleString() });
-        }, 2000);
-    };
-
-    // TARS แชท
-    window.askTARS = () => {
-        const q = document.getElementById('chatIn').value; if(!q) return;
-        const box = document.getElementById('chatBox');
-        box.innerHTML += `<div class="msg-user">${q}</div>`;
-        document.getElementById('chatIn').value = "";
-        
-        setTimeout(() => {
-            let ans = "TARS: จากข้อมูล Google... อาการเบื้องต้นน่าจะเป็นผลมาจากสุขอนามัยช่องปาก แนะนำให้แปรงลิ้นให้สะอาดครับ";
-            box.innerHTML += `<div class="msg-ai">${ans}</div>`;
-            box.scrollTop = box.scrollHeight;
-        }, 1000);
-    };
-
-    // ดึงข้อมูลประวัติ
-    function fetchData(uid) {
-        onValue(ref(db, `users/${uid}/history`), snap => {
-            const hFeed = document.getElementById('histFeed'); hFeed.innerHTML = "";
-            if(snap.val()) Object.values(snap.val()).reverse().forEach(h => {
-                hFeed.innerHTML += `<div class="card p-2 mb-2 border-0 bg-light small text-start"><b>${h.title}</b><small>${h.time}</small></div>`;
-            });
-        });
-    }
-
-</script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html></head>
-<body>
-
-<nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm">
-    <div class="container">
-        <a class="navbar-brand fw-800 text-primary" href="#" onclick="location.reload()">
-            <i class="bi bi-shield-plus me-2"></i>TongueCheck <span class="text-dark">PRO</span>
-        </a>
-        <button id="navLogout" class="btn btn-outline-danger btn-sm rounded-pill d-none" onclick="logout()">ออกจากระบบ</button>
-    </div>
-</nav>
-
-<div class="container py-4">
-
-    <div id="authSection" class="row justify-content-center py-5">
-        <div class="col-md-5">
-            <div class="glass-card p-5 animate__animated animate__fadeIn">
-                <div class="text-center mb-4">
-                    
-                    <h3 class="fw-800">Hospital Portal</h3>
-                    <p class="text-muted small">ล็อกอินเข้าสู่ระบบจัดการเวชระเบียน</p>
-                </div>
-                <input type="email" id="email" class="form-control rounded-pill mb-3 px-4" placeholder="Email Staff">
-                <input type="password" id="password" class="form-control rounded-pill mb-4 px-4" placeholder="Password">
-                <button class="btn btn-primary w-100 rounded-pill py-2 fw-bold" onclick="authAction('login')">เข้าสู่ระบบ</button>
-                <hr>
-                <button class="btn btn-link w-100 text-decoration-none text-muted" onclick="authAction('signup')">ลงทะเบียนบุคลากรใหม่</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="mainSection" class="d-none">
-        
-        <div id="homeView" class="animate__animated animate__fadeIn">
-            <div class="text-center py-4">
-                
-                <h1 class="fw-800 mt-3">ยินดีต้อนรับสู่ TongueCheck</h1>
-                <p class="text-muted fs-5">ระบบ AI วิเคราะห์รอยโรคทางลิ้นระดับคลินิกแม่นยำสูง</p>
-            </div>
-            
-            <div class="row g-4 mt-2 justify-content-center">
-                <div class="col-6 col-md-4">
-                    <div class="glass-card p-4 text-center menu-item h-100" onclick="switchView('scan-view')">
-                        <i class="bi bi-camera-fill fs-1 text-primary mb-2"></i>
-                        <h6 class="fw-bold">เริ่มวิเคราะห์โรค</h6>
-                    </div>
-                </div>
-                <div class="col-6 col-md-4">
-                    <div class="glass-card p-4 text-center menu-item h-100" onclick="switchView('plan-view')">
-                        <i class="bi bi-journal-medical fs-1 text-success mb-2"></i>
-                        <h6 class="fw-bold">แผนการรักษา</h6>
-                    </div>
-                </div>
-                <div class="col-6 col-md-4">
-                    <div class="glass-card p-4 text-center menu-item h-100" onclick="switchView('history-view')">
-                        <i class="bi bi-person-lines-fill fs-1 text-secondary mb-2"></i>
-                        <h6 class="fw-bold">ประวัติเวชระเบียน</h6>
-                    </div>
-                </div>
-                <div class="col-6 col-md-4">
-                    <div class="glass-card p-4 text-center menu-item h-100" onclick="switchView('chat-view')">
-                        <i class="bi bi-robot fs-1 text-info mb-2"></i>
-                        <h6 class="fw-bold">ปรึกษา TARS AI</h6>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="subViewContainer" class="d-none">
-            <button class="btn btn-light rounded-pill mb-4 px-3 shadow-sm" onclick="backToHome()">
-                <i class="bi bi-arrow-left"></i> กลับหน้าหลัก
-            </button>
-
-            <div id="scan-view" class="sub-page d-none">
-                <div class="row justify-content-center">
-                    <div class="col-md-8">
-                        <div class="glass-card p-4 text-center">
-                            <h5 class="fw-800 mb-3"><i class="bi bi-camera me-2 text-danger"></i>Clinical AI Scanner</h5>
-                            <div id="video-wrap">
-                                <video id="video" autoplay playsinline></video>
-                                <div id="scanLine" class="scan-line"></div>
-                            </div>
-                            <div class="mt-4 d-flex justify-content-center gap-2">
-                                <button class="btn btn-light rounded-pill" onclick="toggleCam()"><i class="bi bi-arrow-repeat"></i> สลับกล้อง</button>
-                                <button class="btn btn-primary rounded-pill px-5 fw-bold shadow" onclick="runClinicalAI()"><i class="bi bi-magic"></i> วิเคราะห์พยาธิสภาพ</button>
-                            </div>
-                            <canvas id="canvas" class="d-none" width="400" height="300"></canvas>
-                            <div id="clinicalResult" class="mt-4"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="plan-view" class="sub-page d-none">
-                <div class="glass-card p-4">
-                    <h5 class="fw-800 mb-4 text-success"><i class="bi bi-calendar-check me-2"></i>Care Planner</h5>
-                    <div class="row g-2 mb-4">
-                        <div class="col-md-6"><button class="btn btn-outline-primary w-100 rounded-pill py-3" onclick="useAIPlan()"><i class="bi bi-stars"></i> แผนแนะนำจาก AI</button></div>
-                        <div class="col-md-6"><button class="btn btn-outline-secondary w-100 rounded-pill py-3" onclick="toggleCustomPlan()"><i class="bi bi-pencil"></i> เพิ่มแผนเอง</button></div>
-                    </div>
-                    <div id="customInWrap" class="input-group mb-4 d-none shadow-sm rounded-pill overflow-hidden">
-                        <input type="text" id="taskIn" class="form-control border-0 ps-4" placeholder="ระบุการรักษา...">
-                        <button class="btn btn-success px-4" onclick="addPlan()">บันทึก</button>
-                    </div>
-                    <div id="plannerDate" class="badge bg-light text-dark mb-3 p-2"></div>
-                    <ul id="planList" class="list-group list-group-flush"></ul>
-                </div>
-            </div>
-
-            <div id="history-view" class="sub-page d-none">
-                <div class="glass-card p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h5 class="fw-800 mb-0"><i class="bi bi-clock-history me-2 text-secondary"></i>Clinical Records</h5>
-                        <button class="btn btn-outline-danger btn-sm rounded-pill" onclick="clearHistory()">ล้างประวัติ</button>
-                    </div>
-                    <div id="historyFeed"></div>
-                </div>
-            </div>
-
-            <div id="chat-view" class="sub-page d-none">
-                <div class="glass-card p-4">
-                    <h5 class="fw-800 mb-3 text-info"><i class="bi bi-robot me-2"></i>TARS Assistant</h5>
-                    <div id="chatBox" class="chat-container d-flex flex-column mb-3 border"></div>
-                    <div class="input-group rounded-pill overflow-hidden shadow-sm">
-                        <input type="text" id="chatIn" class="form-control border-0 ps-4" placeholder="ถาม TARS เกี่ยวกับโรคลิ้น (ICD-10)...">
-                        <button class="btn btn-info text-white px-4" onclick="askTars()"><i class="bi bi-send"></i></button>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="diagModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content glass-card border-0">
-            <div class="modal-header border-0"><h5 class="fw-800 mb-0">Pathology Report</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-            <div class="modal-body">
-                <p class="small text-muted mb-2">ข้อมูลอ้างอิงจากฐานข้อมูลการแพทย์ทางคลินิก</p>
-                <div class="mb-3">
-                    <label class="fw-bold text-primary">สาเหตุ (Etiology):</label>
-                    <p id="diagCause" class="small"></p>
-                </div>
-                <div class="mb-3">
-                    <label class="fw-bold text-success">การรักษาเบื้องต้น (Treatment):</label>
-                    <p id="diagTreat" class="small"></p>
-                </div>
-                <div class="alert alert-warning py-2 small">การวินิจฉัยนี้เป็นผลจาก AI เบื้องต้น จำเป็นต้องได้รับการยืนยันจากแพทย์เฉพาะทาง</div>
-            </div>
-            <div class="modal-footer border-0">
-                <button class="btn btn-primary rounded-pill w-100" onclick="addDiagToPlan()">เพิ่มวิธีแก้ลงในแผนรักษา</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, push, onValue, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-    const firebaseConfig = {
-        apiKey: "AIzaSyAT_a_mJqgA4BpJAHsdnFG8DbitAWUoLko",
-        authDomain: "tonguecheck.firebaseapp.com",
-        databaseURL: "https://tonguecheck-default-rtdb.asia-southeast1.firebasedatabase.app",
-        projectId: "tonguecheck",
-        storageBucket: "tonguecheck.firebasestorage.app",
-        messagingSenderId: "278288057340",
-        appId: "1:278288057340:web:dcc14f73fa8806c0176879"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
-
-    let stream = null, mode = "user", currentDiag = null;
-
-    // --- NAVIGATION LOGIC ---
-    window.switchView = (id) => {
-        document.getElementById('homeView').classList.add('d-none');
-        document.getElementById('subViewContainer').classList.remove('d-none');
-        document.querySelectorAll('.sub-page').forEach(p => p.classList.add('d-none'));
-        document.getElementById(id).classList.remove('d-none');
-        if(id === 'scan-view') startCam();
-        if(id === 'plan-view') document.getElementById('plannerDate').innerText = "วันที่: " + new Date().toLocaleDateString('th-TH');
-    };
-    window.backToHome = () => {
-        document.getElementById('homeView').classList.remove('d-none');
-        document.getElementById('subViewContainer').classList.add('d-none');
-        stopCam();
-    };
-
-    // --- AUTH ENGINE ---
-    window.authAction = (type) => {
-        const e = document.getElementById('email').value, p = document.getElementById('password').value;
-        if(type === 'login') signInWithEmailAndPassword(auth, e, p);
-        else createUserWithEmailAndPassword(auth, e, p);
     };
     window.logout = () => signOut(auth);
-    onAuthStateChanged(auth, user => {
+
+    onAuthStateChanged(auth, (user) => {
         if(user) {
             document.getElementById('authSection').classList.add('d-none');
             document.getElementById('mainSection').classList.remove('d-none');
-            document.getElementById('navLogout').classList.remove('d-none');
-            syncData();
+            document.getElementById('btnLogout').classList.remove('d-none');
+            syncUserData();
         } else {
             document.getElementById('authSection').classList.remove('d-none');
             document.getElementById('mainSection').classList.add('d-none');
-            document.getElementById('navLogout').classList.add('d-none');
+            document.getElementById('btnLogout').classList.add('d-none');
         }
     });
 
-    // --- CLINICAL AI SCANNER ---
+    // --- Navigation ---
+    window.showPage = (id) => {
+        document.getElementById('homePage').classList.add('d-none');
+        document.getElementById('pageContent').classList.remove('d-none');
+        document.querySelectorAll('.content-view').forEach(v => v.classList.add('d-none'));
+        document.getElementById(id).classList.remove('d-none');
+        if(id === 'scan-tab') startCam();
+    };
+    window.showHome = () => {
+        document.getElementById('homePage').classList.remove('d-none');
+        document.getElementById('pageContent').classList.add('d-none');
+    };
+
+    // --- Camera Control ---
     async function startCam() {
-        if(stream) stopCam();
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: mode } });
-        document.getElementById('video').srcObject = stream;
+        if(currentStream) currentStream.getTracks().forEach(t => t.stop());
+        try {
+            currentStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facingMode } });
+            const v = document.getElementById('video');
+            v.srcObject = currentStream;
+            v.className = (facingMode === "user") ? "" : "back-cam";
+        } catch (e) { alert("ไม่สามารถเปิดกล้องได้"); }
     }
-    function stopCam() { if(stream) stream.getTracks().forEach(t => t.stop()); }
-    window.toggleCam = () => { mode = (mode === "user" ? "environment" : "user"); startCam(); };
+    window.switchCamera = () => { facingMode = (facingMode === "user") ? "environment" : "user"; startCam(); };
 
-    
-    window.runClinicalAI = () => {
-        document.getElementById('scanLine').style.display = "block";
-        const v = document.getElementById('video'), c = document.getElementById('canvas'), ctx = c.getContext('2d');
+    // --- AI Analysis & Auto History Save ---
+    window.startAIAnalysis = () => {
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         
-        setTimeout(() => {
-            ctx.drawImage(v, 0, 0, c.width, c.height);
-            const pixels = ctx.getImageData(150, 100, 100, 100).data;
-            let r=0, g=0, b=0;
-            for(let i=0; i<pixels.length; i+=4) { r+=pixels[i]; g+=pixels[i+1]; b+=pixels[i+2]; }
-            const avgR = r/(pixels.length/4), avgG = g/(pixels.length/4);
-            
-            document.getElementById('scanLine').style.display = "none";
-            
-            // Clinical Logic
-            let res = { name: "Normal (ลิ้นปกติ)", color: "success", code: "N/A", cause: "พื้นผิวปกติ สีชมพูระเรื่อ สุขอนามัยดี", treat: "รักษาความสะอาดตามปกติ" };
-            if(avgG > 185) res = { name: "Oral Candidiasis (ฝ้าขาว)", color: "warning", code: "B37.0", cause: "สะสมของแบคทีเรียหรือเชื้อรา Candida", treat: "ใช้ที่ขูดลิ้นและพบทันตแพทย์เพื่อพิจารณายาต้านเชื้อรา" };
-            else if(avgR > 210) res = { name: "Glossitis (ลิ้นอักเสบ)", color: "danger", code: "K14.0", cause: "ขาด Vitamin B12 / ร่างกายอักเสบ", treat: "ทานวิตามินบีรวมและงดอาหารรสจัด" };
+        const pixels = ctx.getImageData(150, 100, 100, 100).data;
+        let r=0, g=0;
+        for(let i=0; i<pixels.length; i+=4) { r+=pixels[i]; g+=pixels[i+1]; }
+        const avgR=r/(pixels.length/4), avgG=g/(pixels.length/4);
 
-            currentDiag = res;
-            document.getElementById('clinicalResult').innerHTML = `
-                <div class="alert alert-${res.color} animate__animated animate__fadeInUp shadow-sm">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h6 class="fw-bold mb-0">${res.name} [${res.code}]</h6>
-                        <button class="btn btn-sm btn-dark rounded-pill" onclick="showDiagDetail()">สำรวจสาเหตุและวิธีแก้</button>
-                    </div>
-                </div>`;
-            
+        let res = { title: "ลิ้นปกติ", type: "success", info: "ลิ้นสีชมพูดูสุขภาพดีมากครับ" };
+        if(avgG > 170) res = { title: "พบคราบฝ้าขาว", type: "warning", info: "แนะนำให้ใช้ที่ขูดลิ้นและดื่มน้ำเพิ่มครับ" };
+        else if(avgR > 210) res = { title: "ลิ้นแดงอักเสบ", type: "danger", info: "อาจจะขาดวิตามินหรือร้อนใน ควรพักผ่อนครับ" };
+
+        document.getElementById('resultOutput').innerHTML = `
+            <div class="alert alert-${res.type} animate__animated animate__fadeInUp shadow-sm">
+                <b>ผลตรวจ: ${res.title}</b><br><small>${res.info}</small>
+            </div>
+        `;
+
+        // SAVE TO HISTORY AUTOMATICALLY
+        push(ref(db, `users/${auth.currentUser.uid}/history`), {
+            category: "SCAN",
+            title: res.title,
+            detail: res.info,
+            timestamp: new Date().toLocaleString('th-TH')
+        });
+    };
+
+    // --- Planner & Auto History Save ---
+    window.addCustomPlan = () => {
+        const task = document.getElementById('planInput').value;
+        if(task) {
+            const planRef = ref(db, `users/${auth.currentUser.uid}/plans`);
+            push(planRef, { task: task });
+
+            // SAVE ACTIVITY TO HISTORY
             push(ref(db, `users/${auth.currentUser.uid}/history`), {
-                type: 'DIAGNOSIS', title: res.name, detail: res.cause, style: `border-start-${res.color}`, timestamp: new Date().toLocaleString('th-TH')
+                category: "PLAN",
+                title: "เพิ่มแผนใหม่",
+                detail: `คุณได้เพิ่มแผน: ${task}`,
+                timestamp: new Date().toLocaleString('th-TH')
             });
-        }, 1500);
+
+            document.getElementById('planInput').value = "";
+        }
     };
 
-    window.showDiagDetail = () => {
-        document.getElementById('diagCause').innerText = currentDiag.cause;
-        document.getElementById('diagTreat').innerText = currentDiag.treat;
-        new bootstrap.Modal(document.getElementById('diagModal')).show();
-    };
-
-    window.addDiagToPlan = () => {
-        push(ref(db, `users/${auth.currentUser.uid}/plans`), { task: currentDiag.treat, date: new Date().toLocaleDateString('th-TH') });
-        bootstrap.Modal.getInstance(document.getElementById('diagModal')).hide();
-        alert("เพิ่มแผนการดูแลแล้ว!");
-    };
-
-    // --- PLANNER & TARS ---
-    window.useAIPlan = () => {
-        const plans = ["บ้วนปากด้วยน้ำเกลืออุ่นๆ", "ขูดลิ้นเบาๆ วันละ 2 ครั้ง", "ดื่มน้ำสะอาด 2 ลิตรต่อวัน", "งดสูบบุหรี่และแอลกอฮอล์"];
-        const p = plans[Math.floor(Math.random()*plans.length)];
-        push(ref(db, `users/${auth.currentUser.uid}/plans`), { task: "AI: " + p, date: new Date().toLocaleDateString('th-TH') });
-    };
-    window.toggleCustomPlan = () => document.getElementById('customInWrap').classList.toggle('d-none');
-    window.addPlan = () => {
-        const t = document.getElementById('taskIn').value; if(!t) return;
-        push(ref(db, `users/${auth.currentUser.uid}/plans`), { task: t, date: new Date().toLocaleDateString('th-TH') });
-        document.getElementById('taskIn').value = "";
-    };
-
-    window.askTars = () => {
-        const q = document.getElementById('chatIn').value; if(!q) return;
-        const box = document.getElementById('chatBox');
-        box.innerHTML += `<div class="msg-user">${q}</div>`;
-        document.getElementById('chatIn').value = "";
-        
-        setTimeout(() => {
-            let a = "TARS: จากฐานข้อมูล Google Medical... อาการที่คุณถามสัมพันธ์กับรหัส ICD-10 กลุ่มพยาธิวิทยาช่องปาก แนะนำให้ตรวจลักษณะปุ่มลิ้นร่วมด้วยครับ";
-            if(q.includes("ยา")) a = "TARS: ⚠️ คำเตือน! AI ไม่สามารถสั่งยาอันตรายได้ แนะนำให้พบแพทย์เพื่อรับยา Antifungal หากสงสัยเชื้อราครับ";
-            box.innerHTML += `<div class="msg-ai">${a}</div>`;
-            box.scrollTop = box.scrollHeight;
-        }, 1200);
-    };
-
-    // --- DATA SYNC ---
-    function syncData() {
-        onValue(ref(db, `users/${auth.currentUser.uid}`), snap => {
+    // --- Sync & Show Data ---
+    function syncUserData() {
+        onValue(ref(db, `users/${auth.currentUser.uid}`), (snap) => {
             const data = snap.val();
-            const hFeed = document.getElementById('historyFeed'); hFeed.innerHTML = "";
-            if(data?.history) Object.entries(data.history).reverse().forEach(([id, h]) => {
-                hFeed.innerHTML += `<div class="card p-3 mb-2 shadow-sm border-0 ${h.style}" style="border-left:5px solid">
-                    <div class="d-flex justify-content-between mb-1"><small class="fw-bold text-primary">${h.type}</small><small class="text-muted small">${h.timestamp}</small></div>
-                    <div class="fw-bold">${h.title}</div><div class="small text-muted">${h.detail}</div></div>`;
-            });
+            
+            // Planner UI
             const pList = document.getElementById('planList'); pList.innerHTML = "";
             if(data?.plans) Object.entries(data.plans).forEach(([id, p]) => {
-                pList.innerHTML += `<li class="list-group-item d-flex justify-content-between align-items-center bg-transparent border-0 px-0">
-                    <span>✅ ${p.task}</span><button class="btn btn-sm text-danger" onclick="delData('plans/${id}')"><i class="bi bi-trash"></i></button></li>`;
+                pList.innerHTML += `<li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>✅ ${p.task}</span>
+                    <button class="btn btn-sm text-danger" onclick="deleteItem('plans/${id}')">ลบ</button>
+                </li>`;
             });
+
+            // History UI (All activities)
+            const hList = document.getElementById('historyData'); hList.innerHTML = "";
+            if(data?.history) {
+                Object.entries(data.history).reverse().forEach(([id, h]) => {
+                    const badge = h.category === "SCAN" ? "badge-scan" : "badge-plan";
+                    hList.innerHTML += `
+                        <div class="p-3 mb-2 border-bottom shadow-sm bg-white rounded">
+                            <span class="badge ${badge} mb-2">${h.category}</span>
+                            <small class="float-end text-muted">${h.timestamp}</small>
+                            <div class="fw-bold">${h.title}</div>
+                            <div class="text-secondary small">${h.detail}</div>
+                        </div>`;
+                });
+            } else hList.innerText = "ยังไม่มีประวัติกิจกรรม";
         });
     }
-    window.delData = path => remove(ref(db, `users/${auth.currentUser.uid}/${path}`));
-    window.clearHistory = () => confirm("ล้างเวชระเบียนทั้งหมด?") && remove(ref(db, `users/${auth.currentUser.uid}/history`));
 
+    window.deleteItem = (path) => remove(ref(db, `users/${auth.currentUser.uid}/${path}`));
 </script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
