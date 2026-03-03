@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TongueCheck Pro AI - ระบบวิเคราะห์และดูแลสุขภาพลิ้น</title>
+    <title>TongueCheck Pro AI - Complete</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
@@ -15,54 +15,55 @@
         body { font-family: 'Sarabun', sans-serif; background-color: var(--bg); }
         .navbar { background: var(--p-blue) !important; border-bottom: 4px solid var(--a-yellow); }
         .card { border-radius: 20px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        .btn-round { border-radius: 50px; font-weight: bold; padding: 10px 25px; }
-        
-        /* Camera UI */
-        #video-container { position: relative; width: 100%; max-width: 450px; margin: auto; border-radius: 25px; overflow: hidden; border: 6px solid white; box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
-        #video { width: 100%; display: block; background: #000; transform: scaleX(-1); }
-        #video.back-cam { transform: scaleX(1); }
-        .scan-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 160px; height: 200px; border: 3px dashed var(--a-yellow); border-radius: 50%; pointer-events: none; opacity: 0.7; }
-
-        /* Navigation */
-        .nav-link-custom { cursor: pointer; padding: 15px; text-align: center; background: white; border-radius: 15px; transition: 0.3s; margin-bottom: 10px; border: 1px solid #eee; }
-        .nav-link-custom:hover { background: #eef2f7; transform: translateY(-3px); }
-        
-        /* Chat UI */
-        #chatBox { height: 300px; overflow-y: auto; background: #fdfdfd; border-radius: 15px; padding: 15px; margin-bottom: 15px; border: 1px solid #eee; }
+        .btn-round { border-radius: 50px; font-weight: bold; padding: 12px 25px; transition: 0.3s; }
+        #video-container { position: relative; width: 100%; max-width: 400px; margin: auto; border-radius: 20px; overflow: hidden; border: 5px solid white; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        #video { width: 100%; transform: scaleX(-1); background: #000; display: block; }
+        .nav-link-custom { cursor: pointer; padding: 20px; text-align: center; background: white; border-radius: 15px; border: 1px solid #eee; transition: 0.3s; }
+        .nav-link-custom:hover { transform: translateY(-5px); background: #f0f4f8; border-color: var(--p-blue); }
+        #chatBox { height: 300px; overflow-y: auto; background: #fff; padding: 15px; border-radius: 15px; border: 1px solid #eee; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
 <nav class="navbar navbar-dark shadow sticky-top">
     <div class="container">
-        <a class="navbar-brand fw-bold" href="#" onclick="showHome()">👅 TongueCheck Pro</a>
+        <a class="navbar-brand fw-bold" href="#" onclick="location.reload()">👅 TongueCheck Pro</a>
         <button id="btnLogout" class="btn btn-outline-light btn-sm btn-round d-none" onclick="logout()">ออกจากระบบ</button>
     </div>
 </nav>
 
 <div class="container py-4">
 
-    <div id="authSection" class="row justify-content-center pt-5">
+    <div id="authSection" class="row justify-content-center pt-4">
         <div class="col-md-5">
-            <div class="card p-5 text-center shadow-lg animate__animated animate__fadeIn">
-                <h3 class="fw-bold mb-4">ยินดีต้อนรับ</h3>
+            <div class="card p-4 text-center shadow-lg animate__animated animate__fadeIn">
+                <h3 id="authTitle" class="fw-bold mb-4">เข้าสู่ระบบ</h3>
                 <div id="authError" class="alert alert-danger d-none small"></div>
-                <input type="email" id="email" class="form-control mb-3 btn-round" placeholder="อีเมล (example@mail.com)">
+                
+                <input type="email" id="email" class="form-control mb-3 btn-round" placeholder="อีเมล">
                 <input type="password" id="password" class="form-control mb-4 btn-round" placeholder="รหัสผ่าน (6 ตัวขึ้นไป)">
-                <button class="btn btn-primary w-100 mb-2 btn-round py-3" onclick="handleAuth('login')">เข้าสู่ระบบ</button>
-                <button class="btn btn-outline-secondary w-100 btn-round" onclick="handleAuth('signup')">สมัครสมาชิกใหม่</button>
-                <small class="text-muted mt-3 d-block">ระบบจะจำบัญชีของคุณเพื่อเก็บประวัติสุขภาพ</small>
+                
+                <button id="mainAuthBtn" class="btn btn-primary w-100 mb-2 btn-round" onclick="handleAuth()">ตกลง</button>
+                
+                <div class="my-3 text-muted small">หรือ</div>
+                
+                <button class="btn btn-outline-dark w-100 mb-3 btn-round d-flex align-items-center justify-content-center" onclick="loginWithGoogle()">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" class="me-2"> 
+                    เข้าสู่ระบบด้วย Google
+                </button>
+
+                <button id="btnSwitchMode" class="btn btn-link w-100 btn-sm text-decoration-none" onclick="toggleAuthMode()">สมัครสมาชิกใหม่</button>
             </div>
         </div>
     </div>
 
     <div id="mainSection" class="d-none">
-        <div id="homePage" class="animate__animated animate__fadeIn text-center">
-            <h2 class="fw-bold mb-4">สวัสดีครับ คุณสุขภาพลิ้นเป็นอย่างไร?</h2>
+        <div id="homePage" class="animate__animated animate__fadeIn">
+            <h4 class="fw-bold mb-4 text-center">สวัสดีคุณ <span id="userNameDisplay" class="text-primary">ผู้ใช้งาน</span></h4>
             <div class="row g-3">
                 <div class="col-6 col-md-3"><div class="nav-link-custom shadow-sm" onclick="showPage('scan-tab')"><h3>📸</h3><b>วิเคราะห์ลิ้น</b></div></div>
                 <div class="col-6 col-md-3"><div class="nav-link-custom shadow-sm" onclick="showPage('plan-tab')"><h3>📅</h3><b>แพลนเนอร์</b></div></div>
-                <div class="col-6 col-md-3"><div class="nav-link-custom shadow-sm" onclick="showPage('history-tab')"><h3>⏳</h3><b>สถิติ & ประวัติ</b></div></div>
+                <div class="col-6 col-md-3"><div class="nav-link-custom shadow-sm" onclick="showPage('history-tab')"><h3>📊</h3><b>สถิติ & ประวัติ</b></div></div>
                 <div class="col-6 col-md-3"><div class="nav-link-custom shadow-sm" onclick="showPage('chat-tab')"><h3>🤖</h3><b>คุยกับหมอ AI</b></div></div>
             </div>
         </div>
@@ -71,64 +72,59 @@
             <button class="btn btn-light btn-round mb-4" onclick="showHome()">⬅️ กลับหน้าหลัก</button>
 
             <div class="content-view d-none" id="scan-tab">
-                <div id="video-container">
-                    <video id="video" autoplay playsinline></video>
-                    <div class="scan-overlay"></div>
-                </div>
+                <div id="video-container"><video id="video" autoplay playsinline></video></div>
                 <div class="text-center mt-3">
-                    <button class="btn btn-secondary btn-round mb-2" onclick="switchCamera()">🔄 สลับกล้อง</button><br>
-                    <button class="btn btn-danger btn-round px-5 py-3 shadow-lg" onclick="startAIAnalysis()">🔬 วิเคราะห์สุขภาพลิ้น</button>
+                    <button class="btn btn-danger btn-round px-5 shadow" onclick="startAIAnalysis()">🔬 วิเคราะห์สุขภาพลิ้น</button>
                 </div>
-                <canvas id="canvas" class="d-none" width="400" height="300"></canvas>
                 <div id="resultOutput" class="mt-4"></div>
+                <canvas id="canvas" class="d-none" width="400" height="300"></canvas>
             </div>
 
             <div class="content-view d-none" id="plan-tab">
                 <div class="card p-4">
-                    <h5 class="fw-bold mb-3">📅 ตารางดูแลสุขภาพลิ้นของคุณ</h5>
+                    <h5 class="fw-bold mb-3">📅 ตารางดูแลสุขภาพ</h5>
                     <div class="input-group mb-3">
-                        <input type="text" id="planInput" class="form-control" placeholder="เช่น แปรงลิ้น, ดื่มน้ำเพิ่ม...">
-                        <button class="btn btn-primary px-4" onclick="addCustomPlan()">เพิ่ม</button>
+                        <input type="text" id="planInput" class="form-control" placeholder="เช่น ดื่มน้ำเยอะๆ...">
+                        <button class="btn btn-primary px-4" onclick="addPlan()">เพิ่ม</button>
                     </div>
                     <ul id="planList" class="list-group list-group-flush"></ul>
                 </div>
             </div>
 
             <div class="content-view d-none" id="history-tab">
-                <div class="card p-4 mb-3">
-                    <h5 class="fw-bold mb-3">📊 สรุปสุขภาพลิ้นของคุณ</h5>
+                <div class="card p-4 mb-3 text-center">
+                    <h5 class="fw-bold">📊 สรุปสุขภาพลิ้น</h5>
                     <div style="max-width: 300px; margin: auto;">
                         <canvas id="healthChart"></canvas>
                     </div>
                 </div>
                 <div class="card p-4">
-                    <h5 class="fw-bold mb-3">⏳ ประวัติย้อนหลัง</h5>
-                    <div id="historyData">กำลังโหลดข้อมูล...</div>
+                    <h5 class="fw-bold mb-3">⏳ ประวัติการวิเคราะห์</h5>
+                    <div id="historyData" class="small">กำลังโหลดข้อมูล...</div>
                 </div>
             </div>
 
             <div class="content-view d-none" id="chat-tab">
                 <div class="card p-4 shadow-sm">
-                    <h5 class="fw-bold mb-3">🤖 ปรึกษาหมอ AI (อัตโนมัติ)</h5>
+                    <h5 class="fw-bold mb-3">🤖 ปรึกษาหมอ AI</h5>
                     <div id="chatBox" class="small">
-                        <p class="text-primary"><b>🤖 หมอ AI:</b> สวัสดีค่ะ วันนี้มีข้อสงสัยเรื่องสุขภาพลิ้นตรงไหน พิมพ์ถามได้เลยนะคะ เช่น "ฝ้าขาว", "ร้อนใน"</p>
+                        <p class="text-primary"><b>🤖 หมอ AI:</b> สวัสดีค่ะ มีข้อสงสัยเรื่องลิ้น พิมพ์ถามได้เลยนะคะ (เช่น "ฝ้าขาว", "เจ็บลิ้น")</p>
                     </div>
                     <div class="input-group">
-                        <input type="text" id="chatInput" class="form-control" placeholder="พิมพ์ข้อความที่นี่...">
-                        <button class="btn btn-primary" onclick="sendMessage()">ส่ง</button>
+                        <input type="text" id="chatInput" class="form-control" placeholder="พิมพ์คำถามที่นี่...">
+                        <button class="btn btn-primary px-4" onclick="sendChat()">ส่ง</button>
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 </div>
 
 <script type="module">
-    // Firebase SDKs (ใช้แบบ CDN เพื่อรันใน Browser ได้เลย)
+    // นำเข้า Firebase SDK
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getDatabase, ref, push, onValue, remove, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     // --- FIREBASE CONFIG (ใช้ของคุณ) ---
     const firebaseConfig = {
@@ -145,35 +141,56 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
+    const provider = new GoogleAuthProvider();
 
+    let authMode = 'login';
     let currentStream = null;
-    let facingMode = "user";
     let healthChart = null;
 
-    // --- AUTHENTICATION ---
-    window.handleAuth = async (type) => {
+    // --- ระบบยืนยันตัวตน ---
+    window.toggleAuthMode = () => {
+        authMode = (authMode === 'login') ? 'signup' : 'login';
+        document.getElementById('authTitle').innerText = (authMode === 'login') ? 'เข้าสู่ระบบ' : 'สมัครสมาชิกใหม่';
+        document.getElementById('btnSwitchMode').innerText = (authMode === 'login') ? 'สมัครสมาชิกใหม่' : 'มีบัญชีอยู่แล้ว? เข้าสู่ระบบ';
+        document.getElementById('authError').classList.add('d-none');
+    };
+
+    window.handleAuth = async () => {
         const em = document.getElementById('email').value;
         const pw = document.getElementById('password').value;
         const err = document.getElementById('authError');
+
         try {
-            if(type === 'login') await signInWithEmailAndPassword(auth, em, pw);
-            else await createUserWithEmailAndPassword(auth, em, pw);
-            err.classList.add('d-none');
+            if (authMode === 'login') {
+                await signInWithEmailAndPassword(auth, em, pw);
+            } else {
+                await createUserWithEmailAndPassword(auth, em, pw);
+                alert("สมัครสมาชิกสำเร็จ! กรุณาล็อกอินเพื่อเข้าใช้งาน");
+                await signOut(auth); // ออกระบบก่อนเพื่อให้ล็อกอินใหม่ตามโจทย์
+                toggleAuthMode(); // สลับกลับหน้าล็อกอิน
+                document.getElementById('password').value = ""; // ล้างรหัสผ่าน
+            }
         } catch (e) {
-            console.error(e);
-            err.innerText = "เกิดข้อผิดพลาด: โปรดเช็กรูปแบบอีเมลหรือรหัสผ่าน (6 ตัวขึ้นไป)";
+            err.innerText = "เกิดข้อผิดพลาด: " + e.message;
             err.classList.remove('d-none');
         }
+    };
+
+    window.loginWithGoogle = async () => {
+        try {
+            await signInWithPopup(auth, provider);
+        } catch (e) { alert("Google Login ล้มเหลว: " + e.message); }
     };
 
     window.logout = () => signOut(auth);
 
     onAuthStateChanged(auth, (user) => {
-        if(user) {
+        if (user) {
             document.getElementById('authSection').classList.add('d-none');
             document.getElementById('mainSection').classList.remove('d-none');
             document.getElementById('btnLogout').classList.remove('d-none');
-            syncUserData();
+            document.getElementById('userNameDisplay').innerText = user.displayName || user.email;
+            syncData();
         } else {
             document.getElementById('authSection').classList.remove('d-none');
             document.getElementById('mainSection').classList.add('d-none');
@@ -182,7 +199,7 @@
         }
     });
 
-    // --- NAVIGATION ---
+    // --- ระบบนำทาง ---
     window.showPage = (id) => {
         document.getElementById('homePage').classList.add('d-none');
         document.getElementById('pageContent').classList.remove('d-none');
@@ -190,30 +207,25 @@
         document.getElementById(id).classList.remove('d-none');
         if(id === 'scan-tab') startCam(); else stopCam();
     };
+
     window.showHome = () => {
         stopCam();
         document.getElementById('homePage').classList.remove('d-none');
         document.getElementById('pageContent').classList.add('d-none');
     };
 
-    // --- CAMERA ---
+    // --- ระบบกล้องและการวิเคราะห์ ---
     async function startCam() {
-        if(currentStream) stopCam();
         try {
-            currentStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facingMode } });
+            currentStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
             document.getElementById('video').srcObject = currentStream;
-            document.getElementById('video').className = (facingMode === "user") ? "" : "back-cam";
-        } catch (e) { alert("เข้าถึงกล้องไม่ได้"); }
+        } catch (e) { alert("เปิดกล้องไม่ได้: " + e.message); }
     }
+
     function stopCam() {
         if(currentStream) currentStream.getTracks().forEach(t => t.stop());
     }
-    window.switchCamera = () => {
-        facingMode = (facingMode === "user") ? "environment" : "user";
-        startCam();
-    };
 
-    // --- ANALYSIS (RGB Logic) ---
     window.startAIAnalysis = () => {
         const v = document.getElementById('video');
         const c = document.getElementById('canvas');
@@ -226,96 +238,83 @@
         const count = pixels.length/4;
         const avgR=r/count, avgG=g/count, avgB=b/count;
 
-        let res = { disease: "ปกติ", status: "success", advice: "ลิ้นสุขภาพดี สีชมพูเรื่อ รักษาวินัยการแปรงลิ้นต่อไปครับ" };
-        if(avgG > 170 && avgR > 170) res = { disease: "พบคราบฝ้าขาว (Coated Tongue)", status: "warning", advice: "ควรใช้ที่ขูดลิ้น แปรงลิ้นเช้า-เย็น และดื่มน้ำให้พอ" };
-        else if(avgR > 210 && avgG < 150) res = { disease: "ลิ้นแดงผิดปกติ (ร้อนใน)", status: "danger", advice: "เลี่ยงอาหารรสจัด พักผ่อนให้เพียงพอ" };
+        let res = { disease: "ปกติ", type: "success", advice: "ลิ้นสุขภาพดี รักษาสุขอนามัยต่อไปค่ะ" };
+        if(avgG > 170 && avgR > 170) res = { disease: "พบคราบฝ้าขาว", type: "warning", advice: "ควรขูดลิ้นและดื่มน้ำเพิ่มขึ้น" };
+        else if(avgR > 210 && avgG < 150) res = { disease: "ลิ้นอักเสบ/แดง", type: "danger", advice: "ควรดื่มน้ำลดอุณหภูมิและพักผ่อน" };
 
-        document.getElementById('resultOutput').innerHTML = `
-            <div class="card p-4 border-start border-5 border-${res.status} animate__animated animate__fadeInUp">
-                <h5 class="fw-bold text-${res.status}">${res.disease}</h5>
-                <p class="mb-0"><b>คำแนะนำ:</b> ${res.advice}</p>
-            </div>`;
+        document.getElementById('resultOutput').innerHTML = `<div class="card p-3 border-start border-5 border-${res.type}"><h5>${res.disease}</h5><p>${res.advice}</p></div>`;
 
         push(ref(db, `users/${auth.currentUser.uid}/history`), {
             date: new Date().toLocaleString('th-TH'),
             disease: res.disease,
-            advice: res.advice,
-            type: res.status
+            type: res.type
         });
     };
 
-    // --- CHAT AI (Keyword Based) ---
-    window.sendMessage = () => {
-        const input = document.getElementById('chatInput');
-        const box = document.getElementById('chatBox');
-        const msg = input.value.trim().toLowerCase();
-        if(!msg) return;
-
-        box.innerHTML += `<p class="text-end"><b>คุณ:</b> ${msg}</p>`;
-        
-        let answer = "หมอ AI ยังไม่ค่อยเข้าใจข้อมูลนี้ แต่เบื้องต้นแนะนำให้รักษาสุขอนามัยช่องปากนะคะ";
-        if(msg.includes("ฝ้าขาว")) answer = "ฝ้าขาวเกิดจากแบคทีเรียสะสม แนะนำให้ขูดลิ้นและดื่มน้ำเยอะๆ ค่ะ";
-        if(msg.includes("ร้อนใน") || msg.includes("แดง")) answer = "อาจเกิดจากร่างกายร้อนในหรือขาดวิตามิน ควรพักผ่อนและทานผักใบเขียวค่ะ";
-        
-        setTimeout(() => {
-            box.innerHTML += `<p class="text-start text-primary"><b>🤖 หมอ AI:</b> ${answer}</p>`;
-            box.scrollTop = box.scrollHeight;
-        }, 500);
-        input.value = "";
-    };
-
-    // --- SYNC DATA & CHART ---
-    function syncUserData() {
+    // --- ระบบฐานข้อมูล & กราฟ ---
+    function syncData() {
         const userRef = ref(db, `users/${auth.currentUser.uid}`);
         onValue(userRef, (snap) => {
             const data = snap.val();
             
-            // History & Chart Data
+            // ประวัติและกราฟ
             const hList = document.getElementById('historyData'); hList.innerHTML = "";
-            let stats = { "ปกติ": 0, "ฝ้าขาว": 0, "ร้อนใน": 0 };
-
+            let stats = { "ปกติ": 0, "พบคราบฝ้าขาว": 0, "ลิ้นอักเสบ/แดง": 0 };
+            
             if(data?.history) {
-                const historyArr = Object.values(data.history);
-                historyArr.reverse().forEach(h => {
-                    if(h.disease.includes("ปกติ")) stats["ปกติ"]++;
-                    else if(h.disease.includes("ฝ้าขาว")) stats["ฝ้าขาว"]++;
-                    else stats["ร้อนใน"]++;
-                    hList.innerHTML += `<div class="p-2 border-bottom small"><b>${h.date}</b>: ${h.disease}</div>`;
+                Object.values(data.history).reverse().forEach(h => {
+                    stats[h.disease] = (stats[h.disease] || 0) + 1;
+                    hList.innerHTML += `<div class="border-bottom py-1"><b>${h.date}</b>: ${h.disease}</div>`;
                 });
-                renderChart(stats);
-            } else { hList.innerText = "ยังไม่มีประวัติการบันทึก"; }
+                updateChart(stats);
+            } else hList.innerText = "ยังไม่มีประวัติ";
 
-            // Planner
+            // แพลนเนอร์
             const pList = document.getElementById('planList'); pList.innerHTML = "";
             if(data?.plans) Object.entries(data.plans).forEach(([id, p]) => {
-                pList.innerHTML += `<li class="list-group-item d-flex justify-content-between align-items-center">
-                    <span>✅ ${p.task}</span>
-                    <button class="btn btn-sm text-danger" onclick="deleteItem('plans/${id}')">ลบ</button>
-                </li>`;
+                pList.innerHTML += `<li class="list-group-item d-flex justify-content-between align-items-center">${p.task} <button class="btn btn-sm text-danger" onclick="deleteItem('plans/${id}')">ลบ</button></li>`;
             });
         });
     }
 
-    function renderChart(stats) {
+    function updateChart(stats) {
         const ctx = document.getElementById('healthChart').getContext('2d');
         if(healthChart) healthChart.destroy();
         healthChart = new Chart(ctx, {
             type: 'doughnut',
             data: {
-                labels: ['ปกติ', 'ฝ้าขาว', 'ร้อนใน/แดง'],
-                datasets: [{
-                    data: [stats["ปกติ"], stats["ฝ้าขาว"], stats["ร้อนใน"]],
-                    backgroundColor: ['#28a745', '#ffc107', '#dc3545']
-                }]
+                labels: Object.keys(stats),
+                datasets: [{ data: Object.values(stats), backgroundColor: ['#28a745', '#ffc107', '#dc3545'] }]
             }
         });
     }
 
-    window.addCustomPlan = () => {
-        const v = document.getElementById('planInput').value;
-        if(v) { push(ref(db, `users/${auth.currentUser.uid}/plans`), { task: v }); document.getElementById('planInput').value = ""; }
+    window.addPlan = () => {
+        const val = document.getElementById('planInput').value;
+        if(val) { push(ref(db, `users/${auth.currentUser.uid}/plans`), { task: val }); document.getElementById('planInput').value = ""; }
     };
-    window.deleteItem = (p) => remove(ref(db, `users/${auth.currentUser.uid}/${p}`));
+
+    window.deleteItem = (path) => remove(ref(db, `users/${auth.currentUser.uid}/${path}`));
+
+    // --- ระบบแชท AI ---
+    window.sendChat = () => {
+        const input = document.getElementById('chatInput');
+        const box = document.getElementById('chatBox');
+        const msg = input.value.trim();
+        if(!msg) return;
+
+        box.innerHTML += `<p class="text-end"><b>คุณ:</b> ${msg}</p>`;
+        
+        let reply = "หมอ AI ยังไม่แน่ใจเรื่องนี้ค่ะ ลองปรึกษาเรื่องฝ้าขาวหรือลิ้นอักเสบดูนะคะ";
+        if(msg.includes("ฝ้าขาว")) reply = "ฝ้าขาวมักเกิดจากคราบอาหารและแบคทีเรีย แนะนำให้ใช้ที่ขูดลิ้นทำความสะอาดทุกเช้าค่ะ";
+        if(msg.includes("เจ็บลิ้น") || msg.includes("แดง")) reply = "หากมีอาการลิ้นแดงหรือเจ็บ อาจเป็นสัญญาณของอาการร้อนใน ควรดื่มน้ำเยอะๆ และเลี่ยงของทอดค่ะ";
+
+        setTimeout(() => {
+            box.innerHTML += `<p class="text-start text-primary"><b>🤖 หมอ AI:</b> ${reply}</p>`;
+            box.scrollTop = box.scrollHeight;
+        }, 500);
+        input.value = "";
+    };
 
 </script>
 </body>
