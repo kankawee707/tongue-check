@@ -3,28 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TongueCheck Pro - AI & History Tracker</title>
+    <title>TongueCheck Pro AI - ระบบวิเคราะห์และดูแลสุขภาพลิ้น</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&display=swap" rel="stylesheet">
 
     <style>
-        :root { --p-blue: #0056b3; --a-yellow: #ffc107; --bg: #f4f7f6; }
+        :root { --p-blue: #0056b3; --a-yellow: #ffc107; --bg: #f8f9fa; }
         body { font-family: 'Sarabun', sans-serif; background-color: var(--bg); }
         .navbar { background: var(--p-blue) !important; border-bottom: 4px solid var(--a-yellow); }
-        .card { border-radius: 20px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.05); transition: 0.3s; }
+        .card { border-radius: 20px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
         .btn-round { border-radius: 50px; font-weight: bold; padding: 10px 25px; }
         
-        /* Camera & Analysis UI */
+        /* Camera UI */
         #video-container { position: relative; width: 100%; max-width: 450px; margin: auto; border-radius: 25px; overflow: hidden; border: 6px solid white; box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
-        #video { width: 100%; background: #000; transform: scaleX(-1); }
+        #video { width: 100%; display: block; background: #000; transform: scaleX(-1); } /* Mirror for front cam */
         #video.back-cam { transform: scaleX(1); }
         .scan-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 160px; height: 200px; border: 3px dashed var(--a-yellow); border-radius: 50%; pointer-events: none; opacity: 0.7; }
 
-        /* History Badge */
-        .badge-scan { background: #e3f2fd; color: #0d47a1; border: 1px solid #bbdefb; }
-        .badge-plan { background: #f1f8e9; color: #33691e; border: 1px solid #dcedc8; }
+        /* Navigation */
+        .nav-link-custom { cursor: pointer; padding: 15px; text-align: center; background: white; border-radius: 15px; transition: 0.3s; margin-bottom: 10px; border: 1px solid #eee; }
+        .nav-link-custom:hover { background: #eef2f7; transform: translateY(-3px); }
     </style>
 </head>
 <body>
@@ -41,9 +41,9 @@
     <div id="authSection" class="row justify-content-center pt-5">
         <div class="col-md-5">
             <div class="card p-5 text-center shadow-lg animate__animated animate__fadeIn">
-                <h3 class="fw-bold mb-4 text-primary">ลงชื่อเข้าใช้งาน</h3>
+                <h3 class="fw-bold mb-4">ยินดีต้อนรับ</h3>
                 <div id="authError" class="alert alert-danger d-none small"></div>
-                <input type="email" id="email" class="form-control mb-3 btn-round" placeholder="อีเมลของคุณ">
+                <input type="email" id="email" class="form-control mb-3 btn-round" placeholder="อีเมล (example@mail.com)">
                 <input type="password" id="password" class="form-control mb-4 btn-round" placeholder="รหัสผ่าน">
                 <button class="btn btn-primary w-100 mb-2 btn-round py-3" onclick="handleAuth('login')">เข้าสู่ระบบ</button>
                 <button class="btn btn-outline-secondary w-100 btn-round" onclick="handleAuth('signup')">สมัครสมาชิกใหม่</button>
@@ -53,38 +53,37 @@
 
     <div id="mainSection" class="d-none">
         <div id="homePage" class="animate__animated animate__fadeIn text-center">
-            <h2 class="fw-bold mb-4">ยินดีต้อนรับสู่ศูนย์ดูแลสุขภาพลิ้น</h2>
+            <h2 class="fw-bold mb-4">สวัสดีครับ คุณสุขภาพลิ้นเป็นอย่างไร?</h2>
             <div class="row g-3">
-                <div class="col-6 col-md-4"><div class="card p-4 shadow-sm" style="cursor:pointer" onclick="showPage('scan-tab')"><h3>📸</h3><b>สแกนลิ้น</b></div></div>
-                <div class="col-6 col-md-4"><div class="card p-4 shadow-sm" style="cursor:pointer" onclick="showPage('plan-tab')"><h3>📅</h3><b>แพลนเนอร์</b></div></div>
-                <div class="col-12 col-md-4"><div class="card p-4 shadow-sm" style="cursor:pointer" onclick="showPage('history-tab')"><h3>⏳</h3><b>ดูประวัติทั้งหมด</b></div></div>
+                <div class="col-6 col-md-3"><div class="nav-link-custom shadow-sm" onclick="showPage('scan-tab')"><h3>📸</h3><b>วิเคราะห์ลิ้น</b></div></div>
+                <div class="col-6 col-md-3"><div class="nav-link-custom shadow-sm" onclick="showPage('plan-tab')"><h3>📅</h3><b>แพลนเนอร์</b></div></div>
+                <div class="col-6 col-md-3"><div class="nav-link-custom shadow-sm" onclick="showPage('history-tab')"><h3>⏳</h3><b>ประวัติบันทึก</b></div></div>
+                <div class="col-6 col-md-3"><div class="nav-link-custom shadow-sm" onclick="showPage('chat-tab')"><h3>🤖</h3><b>คุยกับหมอ AI</b></div></div>
             </div>
         </div>
 
         <div id="pageContent" class="d-none mt-3">
-            <button class="btn btn-light btn-round mb-4 shadow-sm" onclick="showHome()">⬅️ กลับเมนูหลัก</button>
+            <button class="btn btn-light btn-round mb-4" onclick="showHome()">⬅️ กลับหน้าหลัก</button>
 
             <div class="content-view d-none" id="scan-tab">
-                <div class="card p-3 text-center">
-                    <div id="video-container">
-                        <video id="video" autoplay playsinline></video>
-                        <div class="scan-overlay"></div>
-                    </div>
-                    <div class="mt-3">
-                        <button class="btn btn-secondary btn-round mb-2" onclick="switchCamera()">🔄 สลับกล้องหน้า/หลัง</button><br>
-                        <button class="btn btn-danger btn-round px-5 py-3 shadow" onclick="startAIAnalysis()">🔬 วิเคราะห์ลิ้นเดี๋ยวนี้</button>
-                    </div>
-                    <canvas id="canvas" class="d-none" width="400" height="300"></canvas>
-                    <div id="resultOutput" class="mt-4"></div>
+                <div id="video-container">
+                    <video id="video" autoplay playsinline></video>
+                    <div class="scan-overlay"></div>
                 </div>
+                <div class="text-center mt-3">
+                    <button class="btn btn-secondary btn-round mb-2" onclick="switchCamera()">🔄 สลับกล้อง (หน้า/หลัง)</button><br>
+                    <button class="btn btn-danger btn-round px-5 py-3 shadow-lg" onclick="startAIAnalysis()">🔬 วิเคราะห์สุขภาพลิ้น</button>
+                </div>
+                <canvas id="canvas" class="d-none" width="400" height="300"></canvas>
+                <div id="resultOutput" class="mt-4"></div>
             </div>
 
             <div class="content-view d-none" id="plan-tab">
                 <div class="card p-4">
-                    <h5 class="fw-bold mb-3">📅 จัดการตารางสุขภาพ</h5>
-                    <div class="input-group mb-4 shadow-sm">
-                        <input type="text" id="planInput" class="form-control" placeholder="เช่น แปรงลิ้น, ดื่มน้ำ 8 แก้ว...">
-                        <button class="btn btn-primary px-4" onclick="addCustomPlan()">เพิ่มแผน</button>
+                    <h5 class="fw-bold mb-3">📅 ตารางดูแลสุขภาพลิ้นของคุณ</h5>
+                    <div class="input-group mb-3">
+                        <input type="text" id="planInput" class="form-control" placeholder="เช่น แปรงลิ้นเช้า-เย็น, ดื่มน้ำเพิ่ม...">
+                        <button class="btn btn-primary px-4" onclick="addCustomPlan()">เพิ่ม</button>
                     </div>
                     <ul id="planList" class="list-group list-group-flush"></ul>
                 </div>
@@ -92,8 +91,8 @@
 
             <div class="content-view d-none" id="history-tab">
                 <div class="card p-4">
-                    <h5 class="fw-bold mb-3 text-primary">⏳ บันทึกกิจกรรมและผลการตรวจ</h5>
-                    <div id="historyData">กำลังโหลดประวัติ...</div>
+                    <h5 class="fw-bold mb-3">⏳ ประวัติการวิเคราะห์ย้อนหลัง</h5>
+                    <div id="historyData">กำลังโหลดข้อมูล...</div>
                 </div>
             </div>
         </div>
@@ -120,7 +119,7 @@
     const db = getDatabase(app);
 
     let currentStream = null;
-    let facingMode = "user";
+    let facingMode = "user"; // "user" = front, "environment" = back
 
     // --- Authentication ---
     window.handleAuth = async (type) => {
@@ -132,7 +131,7 @@
             else await createUserWithEmailAndPassword(auth, em, pw);
             err.classList.add('d-none');
         } catch (e) {
-            err.innerText = "อีเมลหรือรหัสผ่านไม่ถูกต้อง หรือมีผู้ใช้นี้อยู่แล้ว";
+            err.innerText = "เกิดข้อผิดพลาด: อีเมลหรือรหัสผ่านไม่ถูกต้อง";
             err.classList.remove('d-none');
         }
     };
@@ -164,74 +163,69 @@
         document.getElementById('pageContent').classList.add('d-none');
     };
 
-    // --- Camera Control ---
+    // --- Camera Control (Front/Back) ---
     async function startCam() {
-        if(currentStream) currentStream.getTracks().forEach(t => t.stop());
+        if(currentStream) currentStream.getTracks().forEach(track => track.stop());
         try {
             currentStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facingMode } });
             const v = document.getElementById('video');
             v.srcObject = currentStream;
             v.className = (facingMode === "user") ? "" : "back-cam";
-        } catch (e) { alert("ไม่สามารถเปิดกล้องได้"); }
+        } catch (e) { alert("เข้าถึงกล้องไม่ได้"); }
     }
-    window.switchCamera = () => { facingMode = (facingMode === "user") ? "environment" : "user"; startCam(); };
+    window.switchCamera = () => {
+        facingMode = (facingMode === "user") ? "environment" : "user";
+        startCam();
+    };
 
-    // --- AI Analysis & Auto History Save ---
+    // --- AI Medical Analysis Logic ---
     window.startAIAnalysis = () => {
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         
+        // RGB Calculation
         const pixels = ctx.getImageData(150, 100, 100, 100).data;
-        let r=0, g=0;
-        for(let i=0; i<pixels.length; i+=4) { r+=pixels[i]; g+=pixels[i+1]; }
-        const avgR=r/(pixels.length/4), avgG=g/(pixels.length/4);
+        let r=0, g=0, b=0;
+        for(let i=0; i<pixels.length; i+=4) { r+=pixels[i]; g+=pixels[i+1]; b+=pixels[i+2]; }
+        const count = pixels.length/4;
+        const avgR=r/count, avgG=g/count, avgB=b/count;
 
-        let res = { title: "ลิ้นปกติ", type: "success", info: "ลิ้นสีชมพูดูสุขภาพดีมากครับ" };
-        if(avgG > 170) res = { title: "พบคราบฝ้าขาว", type: "warning", info: "แนะนำให้ใช้ที่ขูดลิ้นและดื่มน้ำเพิ่มครับ" };
-        else if(avgR > 210) res = { title: "ลิ้นแดงอักเสบ", type: "danger", info: "อาจจะขาดวิตามินหรือร้อนใน ควรพักผ่อนครับ" };
+        let result = { disease: "ปกติ", status: "success", advice: "ลิ้นสุขภาพดี สีชมพูเรื่อ รักษาวินัยการแปรงลิ้นต่อไปครับ" };
+
+        if(avgG > 170 && avgR > 170) {
+            result = { disease: "พบคราบฝ้าขาว (Coated Tongue)", status: "warning", advice: "เกิดจากแบคทีเรียสะสม ควรใช้ที่ขูดลิ้น แปรงลิ้นวันละ 2 ครั้ง และดื่มน้ำให้เพียงพอ" };
+        } else if(avgR > 210 && avgG < 150) {
+            result = { disease: "ลิ้นแดงผิดปกติ (Glossitis/ร้อนใน)", status: "danger", advice: "อาจเกิดจากการขาดวิตามิน B12 หรือร่างกายร้อนใน ควรทานผักใบเขียว พักผ่อนให้พอ และเลี่ยงอาหารรสจัด" };
+        } else if(avgR > 180 && avgG > 180 && avgB > 180) {
+            result = { disease: "สงสัยเชื้อราในช่องปาก (Oral Candidiasis)", status: "danger", advice: "พบฝ้าขาวหนาคล้ายนมบูด หากเช็ดไม่ออกและเจ็บ แนะนำให้พบทันตแพทย์เพื่อรับยาฆ่าเชื้อรา" };
+        }
 
         document.getElementById('resultOutput').innerHTML = `
-            <div class="alert alert-${res.type} animate__animated animate__fadeInUp shadow-sm">
-                <b>ผลตรวจ: ${res.title}</b><br><small>${res.info}</small>
+            <div class="card p-4 border-start border-5 border-${result.status} animate__animated animate__fadeInUp">
+                <h5 class="fw-bold text-${result.status}">${result.disease}</h5>
+                <p class="mb-2"><b>คำแนะนำ:</b> ${result.advice}</p>
+                <small class="text-secondary">วิเคราะห์เมื่อ: ${new Date().toLocaleString('th-TH')}</small>
             </div>
         `;
 
-        // SAVE TO HISTORY AUTOMATICALLY
+        // Save to Firebase History
         push(ref(db, `users/${auth.currentUser.uid}/history`), {
-            category: "SCAN",
-            title: res.title,
-            detail: res.info,
-            timestamp: new Date().toLocaleString('th-TH')
+            date: new Date().toLocaleString('th-TH'),
+            disease: result.disease,
+            advice: result.advice,
+            type: result.status
         });
     };
 
-    // --- Planner & Auto History Save ---
-    window.addCustomPlan = () => {
-        const task = document.getElementById('planInput').value;
-        if(task) {
-            const planRef = ref(db, `users/${auth.currentUser.uid}/plans`);
-            push(planRef, { task: task });
-
-            // SAVE ACTIVITY TO HISTORY
-            push(ref(db, `users/${auth.currentUser.uid}/history`), {
-                category: "PLAN",
-                title: "เพิ่มแผนใหม่",
-                detail: `คุณได้เพิ่มแผน: ${task}`,
-                timestamp: new Date().toLocaleString('th-TH')
-            });
-
-            document.getElementById('planInput').value = "";
-        }
-    };
-
-    // --- Sync & Show Data ---
+    // --- Planner & History Data Sync ---
     function syncUserData() {
-        onValue(ref(db, `users/${auth.currentUser.uid}`), (snap) => {
+        const userRef = ref(db, `users/${auth.currentUser.uid}`);
+        onValue(userRef, (snap) => {
             const data = snap.val();
             
-            // Planner UI
+            // Render Planner
             const pList = document.getElementById('planList'); pList.innerHTML = "";
             if(data?.plans) Object.entries(data.plans).forEach(([id, p]) => {
                 pList.innerHTML += `<li class="list-group-item d-flex justify-content-between align-items-center">
@@ -240,22 +234,26 @@
                 </li>`;
             });
 
-            // History UI (All activities)
+            // Render History
             const hList = document.getElementById('historyData'); hList.innerHTML = "";
             if(data?.history) {
                 Object.entries(data.history).reverse().forEach(([id, h]) => {
-                    const badge = h.category === "SCAN" ? "badge-scan" : "badge-plan";
-                    hList.innerHTML += `
-                        <div class="p-3 mb-2 border-bottom shadow-sm bg-white rounded">
-                            <span class="badge ${badge} mb-2">${h.category}</span>
-                            <small class="float-end text-muted">${h.timestamp}</small>
-                            <div class="fw-bold">${h.title}</div>
-                            <div class="text-secondary small">${h.detail}</div>
-                        </div>`;
+                    hList.innerHTML += `<div class="p-3 border-bottom small">
+                        <b class="text-primary">${h.date}</b><br>ผลตรวจ: <b>${h.disease}</b><br>
+                        <span class="text-muted">${h.advice}</span>
+                    </div>`;
                 });
-            } else hList.innerText = "ยังไม่มีประวัติกิจกรรม";
+            } else hList.innerText = "ยังไม่มีประวัติการบันทึก";
         });
     }
+
+    window.addCustomPlan = () => {
+        const val = document.getElementById('planInput').value;
+        if(val) {
+            push(ref(db, `users/${auth.currentUser.uid}/plans`), { task: val });
+            document.getElementById('planInput').value = "";
+        }
+    };
 
     window.deleteItem = (path) => remove(ref(db, `users/${auth.currentUser.uid}/${path}`));
 </script>
