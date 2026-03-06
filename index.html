@@ -3,30 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TongueCheck - วิเคราะห์สุขภาพลิ้น</title>
+    <title>TongueCheck - Image Processing</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
     <style>
-        body { font-family: 'Prompt', sans-serif; background-color: #f8f9fa; }
+        body { font-family: 'Prompt', sans-serif; background-color: #f4f6f9; }
         .bg-primary-custom { background-color: #0d6efd !important; color: white; }
         .hidden { display: none !important; }
-        .card { border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: none; }
-        #cameraContainer { width: 100%; border-radius: 8px; background: #000; overflow: hidden; position: relative; min-height: 250px; }
-        #cameraFeed, #capturedImage { width: 100%; max-height: 350px; object-fit: cover; display: block; }
-        .planner-textarea { resize: none; height: 150px; }
+        .card { border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: none; }
+        
+        /* เมนูด้านซ้าย */
+        .sidebar-menu .nav-link { color: #495057; font-weight: 500; border-radius: 8px; margin-bottom: 8px; padding: 12px 20px; }
+        .sidebar-menu .nav-link.active { background-color: #0d6efd; color: #fff; }
+        .sidebar-menu .nav-link:hover:not(.active) { background-color: #e9ecef; }
+        
+        /* กล้องและกรอบนำสายตา */
+        #cameraContainer { width: 100%; border-radius: 12px; background: #000; overflow: hidden; position: relative; min-height: 300px; display: flex; align-items: center; justify-content: center;}
+        #cameraFeed, #capturedImage { width: 100%; max-height: 400px; object-fit: cover; display: block; }
+        
+        /* กรอบตรงกลางเพื่อให้ผู้ใช้เล็งลิ้น */
+        .target-box { position: absolute; width: 120px; height: 120px; border: 2px dashed #0dcaf0; border-radius: 50%; z-index: 5; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.4); pointer-events: none; }
     </style>
 </head>
 <body>
 
-    <nav class="navbar bg-primary-custom p-3">
+    <nav class="navbar bg-primary-custom p-3 sticky-top shadow-sm">
         <div class="container d-flex justify-content-between">
-            <span class="navbar-brand mb-0 h1 text-white d-flex align-items-center">
-                <img src="https://img5.pic.in.th/file/secure-sv1/tongueCheck.jpg" alt="Logo" width="40" height="40" class="rounded-circle me-2 shadow-sm" style="object-fit: cover;">
-                TongueCheck
-            </span>
-            <button id="btnLogout" class="btn btn-light btn-sm hidden">ออกจากระบบ</button>
+            <span class="navbar-brand mb-0 h1 text-white">TongueCheck (CV Analysis)</span>
+            <button id="btnLogout" class="btn btn-light btn-sm hidden fw-bold text-primary">ออกจากระบบ</button>
         </div>
     </nav>
 
@@ -35,29 +41,25 @@
         <div id="authSection" class="row justify-content-center">
             <div class="col-md-5">
                 <div id="welcomeView" class="card p-4 text-center">
-                    <img src="https://img5.pic.in.th/file/secure-sv1/tongueCheck.jpg" alt="TongueCheck Logo" class="mx-auto mb-3 rounded-circle shadow" style="width: 120px; height: 120px; object-fit: cover;">
-                    <h3 class="mb-4">ยินดีต้อนรับสู่ TongueCheck</h3>
-                    <p class="text-muted mb-4" style="font-size: 0.9em;">แอปพลิเคชันวิเคราะห์และดูแลสุขภาพลิ้นของคุณ</p>
-                    <button id="btnShowLogin" class="btn btn-primary mb-2">เข้าสู่ระบบ</button>
-                    <button id="btnShowRegister" class="btn btn-outline-secondary">สมัครสมาชิกใหม่</button>
+                    <h3 class="mb-4">TongueCheck</h3>
+                    <button id="btnShowLogin" class="btn btn-primary mb-2 py-2">เข้าสู่ระบบ</button>
+                    <button id="btnShowRegister" class="btn btn-outline-secondary py-2">สมัครสมาชิกใหม่</button>
                 </div>
-
                 <div id="loginView" class="card p-4 hidden">
                     <h4 class="text-center mb-4">เข้าสู่ระบบ</h4>
                     <form id="loginForm">
                         <div class="mb-3"><input type="email" id="loginEmail" class="form-control" required placeholder="อีเมล"></div>
                         <div class="mb-3"><input type="password" id="loginPassword" class="form-control" required placeholder="รหัสผ่าน"></div>
-                        <button type="submit" class="btn btn-primary w-100 mb-2">เข้าสู่ระบบ</button>
+                        <button type="submit" class="btn btn-primary w-100 mb-2 py-2">ล็อกอินเข้าใช้งาน</button>
                         <button type="button" class="btn btn-link w-100 btnBackToWelcome text-decoration-none">กลับไปหน้าแรก</button>
                     </form>
                 </div>
-
                 <div id="registerView" class="card p-4 hidden">
                     <h4 class="text-center mb-4">สมัครสมาชิก</h4>
                     <form id="registerForm">
                         <div class="mb-3"><input type="email" id="regEmail" class="form-control" required placeholder="อีเมล"></div>
-                        <div class="mb-3"><input type="password" id="regPassword" class="form-control" required placeholder="รหัสผ่าน (6 ตัวขึ้นไป)"></div>
-                        <button type="submit" class="btn btn-success w-100 mb-2">ยืนยันการสมัคร</button>
+                        <div class="mb-3"><input type="password" id="regPassword" class="form-control" required placeholder="รหัสผ่าน"></div>
+                        <button type="submit" class="btn btn-success w-100 mb-2 py-2">ยืนยันการสมัคร</button>
                         <button type="button" class="btn btn-link w-100 btnBackToWelcome text-decoration-none">กลับไปหน้าแรก</button>
                     </form>
                 </div>
@@ -66,101 +68,124 @@
 
         <div id="appSection" class="hidden">
             <div class="row">
-                
-                <div class="col-md-5 mb-4">
-                    <div class="card p-4 mb-3">
-                        <h5 class="mb-3">ถ่ายภาพลิ้นเพื่อวิเคราะห์</h5>
-                        
-                        <div id="cameraContainer" class="mb-3 shadow-sm">
-                            <video id="cameraFeed" autoplay playsinline></video>
-                            <img id="capturedImage" class="hidden" alt="ภาพถ่ายที่จับได้">
-                            <canvas id="canvas" class="hidden"></canvas>
-                        </div>
-
-                        <div class="d-flex justify-content-between mb-3">
-                            <button type="button" id="btnSwitchCamera" class="btn btn-secondary btn-sm">🔄 สลับกล้อง</button>
-                            <button type="button" id="btnCapture" class="btn btn-info btn-sm text-white px-4">📸 ถ่ายภาพ</button>
-                            <button type="button" id="btnRetake" class="btn btn-warning btn-sm hidden px-4">🔄 ถ่ายใหม่</button>
-                        </div>
-                        
-                        <hr>
-                        
-                        <form id="analysisForm">
-                            <div class="mb-3">
-                                <label class="form-label text-muted" style="font-size: 0.9em;">1. เลือกลักษณะ "สี" ของลิ้น</label>
-                                <select id="tongueColor" class="form-select" required>
-                                    <option value="ชมพู (ปกติ)">ชมพู (ปกติ)</option>
-                                    <option value="แดง (อักเสบ)">แดง (อักเสบ/ความร้อน)</option>
-                                    <option value="ซีด (เลือดจาง)">ซีด (เลือดจาง)</option>
-                                    <option value="มีฝ้าขาวหนา">มีฝ้าขาวหนา (ติดเชื้อรา)</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label text-muted" style="font-size: 0.9em;">2. เลือกลักษณะ "รอยแตก/พื้นผิว"</label>
-                                <select id="tongueTexture" class="form-select" required>
-                                    <option value="เรียบเนียน (ปกติ)">เรียบเนียน (ปกติ)</option>
-                                    <option value="มีรอยแตก (Cracked)">มีรอยแตกตรงกลาง หรือทั่วลิ้น</option>
-                                    <option value="มีรอยหยักขอบลิ้น (Scalloped)">มีรอยหยักคล้ายรอยฟันกัดที่ขอบลิ้น</option>
-                                    <option value="มีตุ่มจุดแดง (Strawberry)">มีตุ่มจุดแดงนูนคล้ายสตรอเบอร์รี่</option>
-                                </select>
-                            </div>
-                            <button type="submit" id="btnAnalyze" class="btn btn-primary w-100" disabled>วิเคราะห์และบันทึกผล</button>
-                        </form>
-                    </div>
-
-                    <div class="card p-4">
-                        <h5 class="mb-2">📅 แพลนเนอร์ดูแลสุขภาพลิ้น</h5>
-                        <p class="text-muted" style="font-size:0.85em;">จดบันทึกตารางการดื่มน้ำ, ทานยา หรือทำความสะอาด</p>
-                        <textarea id="plannerText" class="form-control planner-textarea mb-2" placeholder="เช่น 08:00 - แปรงลิ้นและบ้วนปาก&#10;12:00 - ดื่มน้ำ 2 แก้ว..."></textarea>
-                        <button id="btnSavePlanner" class="btn btn-success w-100">บันทึกแพลนเนอร์</button>
-                    </div>
-                </div>
-
-                <div class="col-md-7">
-                    <div class="card p-4">
-                        <h5 class="mb-3">ประวัติการวิเคราะห์ & คำแนะนำ</h5>
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th style="min-width: 100px;">วันที่/เวลา</th>
-                                        <th style="min-width: 140px;">สี และ ลักษณะ</th>
-                                        <th style="min-width: 150px;">ความเสี่ยง/โรค</th>
-                                        <th style="min-width: 200px;">วิธีแก้/คำแนะนำ</th>
-                                        <th>จัดการ</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="historyTableBody"></tbody>
-                            </table>
+                <div class="col-md-3 mb-4">
+                    <div class="card p-3 h-100">
+                        <h6 class="text-muted mb-3 px-2">เมนูการใช้งาน</h6>
+                        <div class="nav flex-column nav-pills sidebar-menu" role="tablist">
+                            <button class="nav-link active text-start" id="nav-camera-tab" data-bs-toggle="pill" data-bs-target="#nav-camera" type="button">📷 วิเคราะห์ภาพลิ้น</button>
+                            <button class="nav-link text-start" id="nav-history-tab" data-bs-toggle="pill" data-bs-target="#nav-history" type="button">📋 ประวัติการวิเคราะห์</button>
+                            <button class="nav-link text-start" id="nav-planner-tab" data-bs-toggle="pill" data-bs-target="#nav-planner" type="button">📅 ตารางแพลนเนอร์</button>
                         </div>
                     </div>
                 </div>
 
+                <div class="col-md-9">
+                    <div class="tab-content">
+                        
+                        <div class="tab-pane fade show active" id="nav-camera">
+                            <div class="card p-4">
+                                <h4 class="mb-3">วิเคราะห์ลิ้นจากค่าสี (RGB/HSV)</h4>
+                                <p class="text-muted">โปรดแลบลิ้นให้อยู่ตรงกลางกรอบวงกลม เพื่อให้ระบบประมวลผลพิกเซลได้แม่นยำที่สุด</p>
+                                
+                                <div id="cameraContainer" class="mb-3 shadow-sm">
+                                    <video id="cameraFeed" autoplay playsinline></video>
+                                    <img id="capturedImage" class="hidden" alt="ภาพถ่าย">
+                                    <canvas id="canvas" class="hidden"></canvas>
+                                    
+                                    <div id="targetBox" class="target-box"></div>
+                                </div>
+
+                                <div class="d-flex justify-content-between mb-3">
+                                    <button type="button" id="btnSwitchCamera" class="btn btn-outline-secondary">🔄 สลับกล้อง</button>
+                                    <button type="button" id="btnCapture" class="btn btn-info text-white px-5 fw-bold shadow-sm">📸 ถ่ายภาพ</button>
+                                    <button type="button" id="btnRetake" class="btn btn-warning hidden px-4">🔄 ถ่ายใหม่</button>
+                                </div>
+                                <hr>
+                                <button id="btnAutoAnalyze" class="btn btn-primary btn-lg w-100 fw-bold shadow-sm" disabled>🔍 สกัดค่าสีและวิเคราะห์พื้นผิว</button>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="nav-history">
+                            <div class="card p-4">
+                                <h4 class="mb-3">ประวัติการวิเคราะห์</h4>
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>วันที่/เวลา</th>
+                                                <th>ผลวิเคราะห์ (ค่าสี/พื้นผิว)</th>
+                                                <th>ความเสี่ยง</th>
+                                                <th>ลบ</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="historyTableBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="nav-planner">
+                            <div class="row">
+                                <div class="col-md-5 mb-3">
+                                    <div class="card p-4 bg-light">
+                                        <h5 class="mb-3 text-primary">➕ เพิ่มกำหนดการใหม่</h5>
+                                        <form id="plannerForm">
+                                            <div class="mb-2"><input type="date" id="planDate" class="form-control" required></div>
+                                            <div class="mb-2"><input type="time" id="planTime" class="form-control" required></div>
+                                            <div class="mb-3"><input type="text" id="planTask" class="form-control" placeholder="กิจกรรม" required></div>
+                                            <button type="submit" class="btn btn-success w-100 fw-bold">บันทึกลงตาราง</button>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="col-md-7">
+                                    <div class="card p-4">
+                                        <h4 class="mb-3">ตารางของฉัน</h4>
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered">
+                                                <thead class="table-primary text-center">
+                                                    <tr><th>วัน/เวลา</th><th>กิจกรรม</th><th>จัดการ</th></tr>
+                                                </thead>
+                                                <tbody id="plannerTableBody"></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
             </div>
         </div>
-
     </div>
 
     <div class="modal fade" id="resultModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
-                <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title fw-bold">ผลการวิเคราะห์สุขภาพลิ้น</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">📊 ผลการวิเคราะห์จากพิกเซล (Image Processing)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <div id="resultStatus" class="alert text-center fw-bold mb-3 fs-5"></div>
-                    
-                    <div id="resultDetails" class="p-3 bg-light rounded" style="font-size: 0.95em;">
-                        <p class="mb-2"><strong>🔍 ลักษณะที่พบ:</strong> <br><span id="resDescription" class="text-secondary" style="white-space: pre-line;"></span></p>
-                        <p class="mb-2"><strong>⚠️ สาเหตุที่เป็นไปได้:</strong> <br><span id="resCause" class="text-secondary" style="white-space: pre-line;"></span></p>
-                        <hr>
-                        <p class="mb-0 text-primary"><strong>💡 การดูแลและการแก้ไขเบื้องต้น:</strong></p>
-                        <p id="resRemedy" class="mt-1 text-dark" style="white-space: pre-line;"></p>
+                <div class="modal-body p-4">
+                    <div class="row">
+                        <div class="col-md-4 text-center mb-3">
+                            <img id="modalResultImage" class="img-fluid rounded shadow-sm border mb-2" alt="ลิ้นของคุณ">
+                            <div class="p-2 bg-dark text-white rounded text-start" style="font-family: monospace; font-size: 0.85em;">
+                                <div>RGB: <span id="rawRgb"></span></div>
+                                <div>HSV: <span id="rawHsv"></span></div>
+                                <div>Texture (StdDev): <span id="rawTexture"></span></div>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div id="resultStatus" class="alert text-center fw-bold mb-3 fs-5"></div>
+                            <div class="bg-light p-3 rounded">
+                                <p class="mb-2"><strong>🔍 ลักษณะลิ้นที่ตรวจจับได้:</strong> <br><span id="resDescription" class="text-secondary"></span></p>
+                                <p class="mb-2"><strong>⚠️ สาเหตุ:</strong> <br><span id="resCause" class="text-secondary"></span></p>
+                                <p class="mb-0 text-success"><strong>💡 คำแนะนำ:</strong></p>
+                                <p id="resRemedy" class="mt-1 text-dark"></p>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">รับทราบและปิดหน้าต่าง</button>
                 </div>
             </div>
         </div>
@@ -170,19 +195,14 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase, ref, push, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAT_a_mJqgA4BpJAHsdnFG8DbitAWUoLko",
             authDomain: "tonguecheck.firebaseapp.com",
             databaseURL: "https://tonguecheck-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "tonguecheck",
-            storageBucket: "tonguecheck.firebasestorage.app",
-            messagingSenderId: "278288057340",
-            appId: "1:278288057340:web:dcc14f73fa8806c0176879",
-            measurementId: "G-0DTTRQMXCK"
+            projectId: "tonguecheck"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -190,267 +210,202 @@
         const db = getDatabase(app);
         let currentUserUid = null;
 
-        const authSection = document.getElementById('authSection');
-        const appSection = document.getElementById('appSection');
-        const btnLogout = document.getElementById('btnLogout');
-        const welcomeView = document.getElementById('welcomeView');
-        const loginView = document.getElementById('loginView');
-        const registerView = document.getElementById('registerView');
-
-        // Authentication
+        // --- AUTH LOGIC (ย่อเพื่อประหยัดพื้นที่) ---
+        const authSection = document.getElementById('authSection'), appSection = document.getElementById('appSection');
+        const welcomeView = document.getElementById('welcomeView'), loginView = document.getElementById('loginView'), registerView = document.getElementById('registerView');
         document.getElementById('btnShowLogin').onclick = () => { welcomeView.classList.add('hidden'); loginView.classList.remove('hidden'); };
         document.getElementById('btnShowRegister').onclick = () => { welcomeView.classList.add('hidden'); registerView.classList.remove('hidden'); };
-        document.querySelectorAll('.btnBackToWelcome').forEach(btn => btn.onclick = () => {
-            loginView.classList.add('hidden'); registerView.classList.add('hidden'); welcomeView.classList.remove('hidden');
-        });
-
-        document.getElementById('registerForm').onsubmit = (e) => {
-            e.preventDefault();
-            const email = document.getElementById('regEmail').value;
-            const password = document.getElementById('regPassword').value;
-            createUserWithEmailAndPassword(auth, email, password).then(() => {
-                alert("สมัครสมาชิกสำเร็จ!");
-                signOut(auth);
-                document.getElementById('registerForm').reset();
-                registerView.classList.add('hidden');
-                loginView.classList.remove('hidden');
-            }).catch(err => alert("เกิดข้อผิดพลาด: " + err.message));
-        };
-
-        document.getElementById('loginForm').onsubmit = (e) => {
-            e.preventDefault();
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            signInWithEmailAndPassword(auth, email, password).catch(err => alert("อีเมลหรือรหัสผ่านไม่ถูกต้อง!"));
-        };
-
-        btnLogout.onclick = () => signOut(auth);
+        document.querySelectorAll('.btnBackToWelcome').forEach(btn => btn.onclick = () => { loginView.classList.add('hidden'); registerView.classList.add('hidden'); welcomeView.classList.remove('hidden'); });
+        
+        document.getElementById('registerForm').onsubmit = (e) => { e.preventDefault(); createUserWithEmailAndPassword(auth, document.getElementById('regEmail').value, document.getElementById('regPassword').value).then(() => { alert("สมัครสำเร็จ"); signOut(auth); location.reload(); }); };
+        document.getElementById('loginForm').onsubmit = (e) => { e.preventDefault(); signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPassword').value); };
+        document.getElementById('btnLogout').onclick = () => signOut(auth);
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                currentUserUid = user.uid;
-                authSection.classList.add('hidden');
-                appSection.classList.remove('hidden');
-                btnLogout.classList.remove('hidden');
-                loadHistory();
-                loadPlanner();
-                startCamera();
-            } else {
-                currentUserUid = null;
-                authSection.classList.remove('hidden');
-                appSection.classList.add('hidden');
-                btnLogout.classList.add('hidden');
-                loginView.classList.add('hidden'); 
-                registerView.classList.add('hidden'); 
-                welcomeView.classList.remove('hidden');
-                document.getElementById('loginForm').reset();
-                stopCamera();
-            }
+                currentUserUid = user.uid; authSection.classList.add('hidden'); appSection.classList.remove('hidden'); document.getElementById('btnLogout').classList.remove('hidden');
+                loadHistory(); loadPlanner(); startCamera();
+            } else { location.reload(); }
         });
 
-        // Camera System
+        // --- CAMERA LOGIC ---
         const video = document.getElementById('cameraFeed');
         const canvas = document.getElementById('canvas');
         const capturedImage = document.getElementById('capturedImage');
-        const btnCapture = document.getElementById('btnCapture');
-        const btnRetake = document.getElementById('btnRetake');
-        const btnAnalyze = document.getElementById('btnAnalyze');
-        let currentStream;
-        let facingMode = "user";
+        const targetBox = document.getElementById('targetBox');
+        const btnCapture = document.getElementById('btnCapture'), btnRetake = document.getElementById('btnRetake'), btnAutoAnalyze = document.getElementById('btnAutoAnalyze');
+        let currentStream; let facingMode = "user";
 
         async function startCamera() {
-            stopCamera();
-            capturedImage.classList.add('hidden');
-            video.classList.remove('hidden');
-            btnRetake.classList.add('hidden');
-            btnCapture.classList.remove('hidden');
-            btnAnalyze.disabled = true; 
-            try {
-                currentStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facingMode } });
-                video.srcObject = currentStream;
-            } catch (err) { console.error("ไม่สามารถเข้าถึงกล้องได้: ", err); }
+            capturedImage.classList.add('hidden'); video.classList.remove('hidden'); targetBox.classList.remove('hidden');
+            btnRetake.classList.add('hidden'); btnCapture.classList.remove('hidden'); btnAutoAnalyze.disabled = true; 
+            try { currentStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facingMode } }); video.srcObject = currentStream; } catch (err) {}
         }
-
-        function stopCamera() {
-            if (currentStream) { currentStream.getTracks().forEach(track => track.stop()); }
-        }
-
-        document.getElementById('btnSwitchCamera').onclick = () => {
-            facingMode = facingMode === "user" ? "environment" : "user";
-            startCamera();
-        };
+        document.getElementById('btnSwitchCamera').onclick = () => { facingMode = facingMode === "user" ? "environment" : "user"; startCamera(); };
 
         btnCapture.onclick = () => {
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
+            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
             canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
             capturedImage.src = canvas.toDataURL('image/jpeg');
-            video.classList.add('hidden');
-            capturedImage.classList.remove('hidden');
-            btnCapture.classList.add('hidden');
-            btnRetake.classList.remove('hidden');
-            btnAnalyze.disabled = false; 
+            video.classList.add('hidden'); targetBox.classList.add('hidden'); capturedImage.classList.remove('hidden');
+            btnCapture.classList.add('hidden'); btnRetake.classList.remove('hidden');
+            btnAutoAnalyze.disabled = false; 
         };
+        btnRetake.onclick = () => { startCamera(); };
 
-        btnRetake.onclick = () => {
-            capturedImage.classList.add('hidden');
-            video.classList.remove('hidden');
-            btnRetake.classList.add('hidden');
-            btnCapture.classList.remove('hidden');
-            btnAnalyze.disabled = true;
-        };
+        // ================= IMAGE PROCESSING (RGB/HSV & TEXTURE) =================
+        
+        // ฟังก์ชันแปลง RGB เป็น HSV
+        function rgbToHsv(r, g, b) {
+            r /= 255; g /= 255; b /= 255;
+            let max = Math.max(r, g, b), min = Math.min(r, g, b);
+            let h, s, v = max;
+            let d = max - min;
+            s = max === 0 ? 0 : d / max;
+            if (max === min) { h = 0; } 
+            else {
+                switch (max) {
+                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                    case g: h = (b - r) / d + 2; break;
+                    case b: h = (r - g) / d + 4; break;
+                }
+                h /= 6;
+            }
+            return [ Math.round(h * 360), Math.round(s * 100), Math.round(v * 100) ];
+        }
 
-        // ================= ANALYSIS LOGIC (ข้อมูลทางการแพทย์จริง) =================
-        function analyzeTongue(color, texture) {
-            let diseases = [];
-            let descriptions = [];
-            let causes = [];
-            let remedies = [];
+        function analyzePixels() {
+            const ctx = canvas.getContext('2d');
+            // ดึงเฉพาะพิกเซลบริเวณ "ตรงกลางภาพ" (จุดที่เล็งลิ้นไว้)
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+            const boxSize = 100; // ขนาดพื้นที่สแกน 100x100 พิกเซล
+            
+            const imgData = ctx.getImageData(cx - (boxSize/2), cy - (boxSize/2), boxSize, boxSize);
+            const data = imgData.data;
 
-            // 1. วิเคราะห์สี
-            if (color === "แดง (อักเสบ)") {
-                diseases.push("อักเสบ/ขาดวิตามิน");
-                descriptions.push("- ลิ้นมีสีแดงจัดผิดปกติ");
-                causes.push("- ร่างกายมีความร้อนสะสม, ติดเชื้อ, หรือขาดวิตามินบี 12 และกรดโฟลิก");
-                remedies.push("- ทานอาหารกลุ่มวิตามินบี (เนื้อสัตว์, ไข่) ดื่มน้ำให้เพียงพอ และพักผ่อน");
-            } else if (color === "ซีด (เลือดจาง)") {
-                diseases.push("ภาวะโลหิตจาง/อ่อนเพลีย");
-                descriptions.push("- ลิ้นมีสีซีด ขาดความอมชมพู");
-                causes.push("- ระบบไหลเวียนเลือดไม่ดี, ขาดธาตุเหล็ก, หรือม้ามและเลือดลมพร่อง");
-                remedies.push("- ทานอาหารเสริมธาตุเหล็ก (ตับ, เนื้อแดง, ผักใบเขียวเข้ม) และนอนหลับให้เพียงพอ");
-            } else if (color === "มีฝ้าขาวหนา") {
-                diseases.push("เชื้อราในช่องปาก/ระบบย่อยอาหาร");
-                descriptions.push("- มีฝ้าสีขาวเกาะหนาบนผิวลิ้น เช็ดออกยาก");
-                causes.push("- สุขอนามัยช่องปากไม่ดี, ติดเชื้อรา (Oral Thrush), หรือกระเพาะอาหารทำงานหนัก");
-                remedies.push("- ใช้ที่แปรงลิ้นทำความสะอาด ดื่มน้ำมากๆ หากฝ้าหนาและเจ็บควรพบแพทย์");
+            let rSum = 0, gSum = 0, bSum = 0;
+            let grayscales = [];
+
+            // วนลูปอ่านค่าสีทีละพิกเซล
+            for (let i = 0; i < data.length; i += 4) {
+                let r = data[i], g = data[i+1], b = data[i+2];
+                rSum += r; gSum += g; bSum += b;
+                
+                // คำนวณความสว่างขาวดำ (Luminance) สำหรับหาพื้นผิว
+                let gray = 0.299 * r + 0.587 * g + 0.114 * b;
+                grayscales.push(gray);
             }
 
-            // 2. วิเคราะห์รอยแตก/พื้นผิว
-            if (texture === "มีรอยแตก (Cracked)") {
-                diseases.push("ร่องลิ้นลึก/ขาดน้ำ");
-                descriptions.push("- มีรอยแยกหรือร่องลึกบนผิวลิ้น (Fissured Tongue)");
-                causes.push("- อาจเป็นกรรมพันธุ์, ร่างกายขาดน้ำเรื้อรัง, ขาดวิตามินบี หรือมีภาวะปากแห้ง");
-                remedies.push("- จิบน้ำบ่อยๆ ตลอดวัน แปรงทำความสะอาดตามร่องลิ้นเพื่อป้องกันเศษอาหารและแบคทีเรียสะสม");
-            } else if (texture === "มีรอยหยักขอบลิ้น (Scalloped)") {
-                diseases.push("ภาวะลิ้นบวม/ไทรอยด์ทำงานต่ำ");
-                descriptions.push("- ขอบลิ้นเป็นรอยหยักโค้งคล้ายรอยฟันกัด (Scalloped Tongue)");
-                causes.push("- ลิ้นบวมโตไปดันซี่ฟัน อาจเกิดจากภาวะไทรอยด์ต่ำ (Hypothyroidism), นอนกัดฟัน, ขาดน้ำ หรือม้ามอ่อนแอ");
-                remedies.push("- ดื่มน้ำให้เพียงพอ หากมีอาการอ่อนเพลียหรือน้ำหนักขึ้นผิดปกติร่วมด้วย ควรเจาะเลือดตรวจไทรอยด์");
-            } else if (texture === "มีตุ่มจุดแดง (Strawberry)") {
-                diseases.push("ติดเชื้อแบคทีเรีย/แพ้อาหาร");
-                descriptions.push("- มีตุ่มสีแดงนูนขึ้นมาทั่วลิ้นคล้ายผิวสตรอเบอร์รี่");
-                causes.push("- ต่อมรับรสอักเสบ อาจเกิดจากการติดเชื้อสเตรปโตคอคคัส (ไข้อีดำอีแดง), โรคคาวาซากิ หรือแพ้ยา");
-                remedies.push("- หากมีไข้สูง ผื่นแดง หรือเจ็บคอร่วมด้วย ควรรีบพบแพทย์ทันที เพื่อรับยาปฏิชีวนะ");
+            let pixelCount = data.length / 4;
+            let avgR = Math.round(rSum / pixelCount);
+            let avgG = Math.round(gSum / pixelCount);
+            let avgB = Math.round(bSum / pixelCount);
+
+            // 1. วิเคราะห์สี (Color)
+            let [h, s, v] = rgbToHsv(avgR, avgG, avgB);
+            let detectedColor = "";
+            let colorCode = "";
+
+            if (s < 20 && v > 70) {
+                detectedColor = "มีฝ้าขาวหนา"; colorCode = "White";
+            } else if (s < 40 && v > 50) {
+                detectedColor = "ซีด (เลือดจาง)"; colorCode = "Pale";
+            } else if (s > 60 && (h < 20 || h > 340)) {
+                detectedColor = "แดง (อักเสบ)"; colorCode = "Red";
+            } else {
+                detectedColor = "ชมพู (ปกติ)"; colorCode = "Pink";
             }
 
-            // 3. สรุปผล
-            if (diseases.length === 0) {
-                return {
-                    isNormal: true,
-                    disease: "ปกติ (สุขภาพดี)",
-                    description: "สีลิ้นและลักษณะพื้นผิวดูเรียบเนียน อมชมพูตามธรรมชาติ",
-                    cause: "ดูแลสุขภาพช่องปากและร่างกายได้ดีเยี่ยม ระบบเลือดและทางเดินอาหารปกติ",
-                    remedy: "แปรงฟันและแปรงลิ้นเป็นประจำ ดื่มน้ำให้เพียงพอเพื่อรักษาสุขภาพที่ดีแบบนี้ต่อไป"
-                };
+            // 2. วิเคราะห์รอยแตก (Texture - Standard Deviation)
+            let meanGray = grayscales.reduce((a, b) => a + b, 0) / pixelCount;
+            let variance = grayscales.reduce((a, b) => a + Math.pow(b - meanGray, 2), 0) / pixelCount;
+            let stdDev = Math.sqrt(variance); // ค่าความแปรปรวนของแสงเงา
+            
+            let detectedTexture = "";
+            // ถ้าค่าความแปรปรวนสูง แสดงว่าพิกเซลมีเงาสลับแสงเยอะ = ขรุขระ/มีรอยแตก
+            if (stdDev > 25) { 
+                detectedTexture = "มีรอยแตก (Cracked)";
+            } else {
+                detectedTexture = "เรียบเนียน (ปกติ)";
             }
 
             return {
-                isNormal: false,
-                disease: "เสี่ยงเป็น: " + diseases.join(" และ "),
-                description: descriptions.join("\n"),
-                cause: causes.join("\n"),
-                remedy: remedies.join("\n")
+                rgb: `${avgR}, ${avgG}, ${avgB}`,
+                hsv: `${h}°, ${s}%, ${v}%`,
+                stdDev: stdDev.toFixed(2),
+                colorStr: detectedColor,
+                textureStr: detectedTexture
             };
         }
 
-        // เมื่อกดปุ่มวิเคราะห์
-        document.getElementById('analysisForm').onsubmit = (e) => {
-            e.preventDefault();
-            if (!currentUserUid) return;
+        btnAutoAnalyze.onclick = () => {
+            const rawData = analyzePixels();
             
-            const color = document.getElementById('tongueColor').value;
-            const texture = document.getElementById('tongueTexture').value;
-            const date = new Date().toLocaleString('th-TH');
+            // ใช้ Logic ทางการแพทย์จากข้อมูลที่ได้
+            let diseases = [], descriptions = [], causes = [], remedies = [];
             
-            // เรียกฟังก์ชันประมวลผล
-            const result = analyzeTongue(color, texture);
+            if (rawData.colorStr === "แดง (อักเสบ)") { diseases.push("อักเสบ/ความร้อน"); causes.push("- ขาดวิตามิน, ติดเชื้อ"); remedies.push("- ทานวิตามินบี, ดื่มน้ำ"); }
+            else if (rawData.colorStr === "ซีด (เลือดจาง)") { diseases.push("เลือดจาง"); causes.push("- ขาดธาตุเหล็ก"); remedies.push("- ทานอาหารเสริมธาตุเหล็ก"); }
+            else if (rawData.colorStr === "มีฝ้าขาวหนา") { diseases.push("เชื้อราในปาก"); causes.push("- สุขอนามัยไม่ดี"); remedies.push("- ทำความสะอาดลิ้นให้ถูกวิธี"); }
+
+            if (rawData.textureStr === "มีรอยแตก (Cracked)") { diseases.push("ขาดน้ำ/มีร่องลิ้น"); causes.push("- ดื่มน้ำน้อย"); remedies.push("- จิบน้ำบ่อยๆ แปรงตามร่องลิ้น"); }
+
+            let resultObj = {
+                isNormal: diseases.length === 0,
+                disease: diseases.length === 0 ? "ปกติ (สุขภาพดี)" : "เสี่ยงเป็น: " + diseases.join(", "),
+                description: `ตรวจพบสี ${rawData.colorStr} และพื้นผิว ${rawData.textureStr}`,
+                cause: causes.length === 0 ? "ดูแลสุขภาพได้ดี" : causes.join("\n"),
+                remedy: remedies.length === 0 ? "รักษาสุขภาพต่อไป" : remedies.join("\n")
+            };
+
+            // อัปเดต UI 
+            document.getElementById('rawRgb').innerText = rawData.rgb;
+            document.getElementById('rawHsv').innerText = rawData.hsv;
+            document.getElementById('rawTexture').innerText = rawData.stdDev;
             
-            // บันทึกลงฐานข้อมูล Firebase
+            document.getElementById('modalResultImage').src = capturedImage.src;
+            const statusBox = document.getElementById('resultStatus');
+            statusBox.className = resultObj.isNormal ? "alert text-center fw-bold mb-3 fs-5 alert-success" : "alert text-center fw-bold mb-3 fs-5 alert-danger";
+            statusBox.innerHTML = resultObj.isNormal ? "✅ สุขภาพลิ้นปกติ!" : "⚠️ " + resultObj.disease;
+
+            document.getElementById('resDescription').innerText = resultObj.description;
+            document.getElementById('resCause').innerText = resultObj.cause;
+            document.getElementById('resRemedy').innerText = resultObj.remedy;
+
+            // บันทึกลง Firebase
             push(ref(db, `users/${currentUserUid}/history`), { 
-                date, color, texture, 
-                disease: result.disease, 
-                remedy: result.remedy.replace(/\n/g, " ") // เซฟลงตารางเป็นบรรทัดเดียว
-            }).then(() => {
-                
-                // จัดการแสดงผล Modal Popup
-                const statusBox = document.getElementById('resultStatus');
-                
-                if(result.isNormal) {
-                    statusBox.className = "alert text-center fw-bold mb-3 fs-5 alert-success";
-                    statusBox.innerHTML = "✅ สุขภาพลิ้นของคุณปกติและแข็งแรงดี!";
-                } else {
-                    statusBox.className = "alert text-center fw-bold mb-3 fs-5 alert-danger";
-                    statusBox.innerHTML = "⚠️ " + result.disease;
-                }
-
-                document.getElementById('resDescription').innerText = result.description;
-                document.getElementById('resCause').innerText = result.cause;
-                document.getElementById('resRemedy').innerText = result.remedy;
-
-                // สั่งให้ Popup เด้งขึ้นมา
-                const modal = new bootstrap.Modal(document.getElementById('resultModal'));
-                modal.show();
-
-                // รีเซ็ตกล้อง
-                btnRetake.click();
+                date: new Date().toLocaleString('th-TH'), color: rawData.colorStr, texture: rawData.textureStr, disease: resultObj.disease
             });
+
+            new bootstrap.Modal(document.getElementById('resultModal')).show();
+            startCamera();
         };
 
+        // --- LOAD HISTORY & PLANNER (ย่อ) ---
         function loadHistory() {
             onValue(ref(db, `users/${currentUserUid}/history`), (snapshot) => {
-                const tbody = document.getElementById('historyTableBody');
-                tbody.innerHTML = "";
-                const data = snapshot.val();
-                if (data) {
-                    Object.keys(data).reverse().forEach(key => { 
-                        const row = data[key];
-                        const tr = document.createElement('tr');
-                        const isNormal = row.disease.includes('ปกติ');
-                        const displayAttr = `<b>${row.color}</b><br><small class="text-muted">${row.texture}</small>`;
-
-                        tr.innerHTML = `
-                            <td><small>${row.date}</small></td>
-                            <td>${displayAttr}</td>
-                            <td class="${isNormal ? 'text-success' : 'text-danger fw-bold'}">${row.disease}</td>
-                            <td><small>${row.remedy}</small></td>
-                            <td><button class="btn btn-sm btn-outline-danger" onclick="deleteRecord('${key}')">ลบ</button></td>
-                        `;
-                        tbody.appendChild(tr);
+                const tbody = document.getElementById('historyTableBody'); tbody.innerHTML = "";
+                if (snapshot.val()) {
+                    Object.keys(snapshot.val()).reverse().forEach(k => {
+                        let r = snapshot.val()[k];
+                        tbody.innerHTML += `<tr><td><small>${r.date}</small></td><td>${r.color}<br><small>${r.texture}</small></td><td class="${r.disease.includes('ปกติ')?'text-success':'text-danger'}">${r.disease}</td><td><button class="btn btn-sm btn-outline-danger" onclick="deleteRecord('${k}')">ลบ</button></td></tr>`;
                     });
-                } else {
-                    tbody.innerHTML = "<tr><td colspan='5' class='text-center py-4 text-muted'>ยังไม่มีประวัติการวิเคราะห์</td></tr>";
                 }
             });
         }
+        window.deleteRecord = (key) => remove(ref(db, `users/${currentUserUid}/history/${key}`));
 
-        window.deleteRecord = (key) => {
-            if (confirm("ต้องการลบประวัตินี้ใช่หรือไม่?")) {
-                remove(ref(db, `users/${currentUserUid}/history/${key}`));
-            }
-        };
-
-        // ================= PLANNER =================
-        document.getElementById('btnSavePlanner').onclick = () => {
-            if (!currentUserUid) return;
-            const text = document.getElementById('plannerText').value;
-            set(ref(db, `users/${currentUserUid}/planner`), text).then(() => alert("บันทึกตารางแพลนเนอร์เรียบร้อยแล้ว!"));
-        };
-
+        document.getElementById('plannerForm').onsubmit = (e) => { e.preventDefault(); push(ref(db, `users/${currentUserUid}/planner_events`), { date: document.getElementById('planDate').value, time: document.getElementById('planTime').value, task: document.getElementById('planTask').value }).then(() => document.getElementById('plannerForm').reset()); };
         function loadPlanner() {
-            onValue(ref(db, `users/${currentUserUid}/planner`), (snapshot) => {
-                document.getElementById('plannerText').value = snapshot.exists() ? snapshot.val() : "";
+            onValue(ref(db, `users/${currentUserUid}/planner_events`), (snapshot) => {
+                const tbody = document.getElementById('plannerTableBody'); tbody.innerHTML = "";
+                if (snapshot.val()) {
+                    Object.keys(snapshot.val()).forEach(k => { let ev = snapshot.val()[k]; tbody.innerHTML += `<tr><td>${ev.date} ${ev.time}</td><td>${ev.task}</td><td><button class="btn btn-sm btn-danger" onclick="deletePlan('${k}')">ลบ</button></td></tr>`; });
+                }
             });
         }
+        window.deletePlan = (key) => remove(ref(db, `users/${currentUserUid}/planner_events/${key}`));
     </script>
 </body>
 </html>
