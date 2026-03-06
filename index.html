@@ -9,22 +9,33 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
     <style>
+        :root {
+            /* กำหนดตัวแปรสีน้ำเงินที่ต้องการใช้งาน */
+            --main-blue: #003399;
+            --hover-blue: #002266;
+        }
+        
         body { font-family: 'Prompt', sans-serif; background-color: #f4f6f9; }
-        .bg-primary-custom { background-color: #0d6efd !important; color: white; }
+        
+        /* เปลี่ยนสีพื้นหลังปุ่มและ Navbar ให้เป็นสีน้ำเงิน */
+        .bg-primary-custom, .btn-primary { background-color: var(--main-blue) !important; border-color: var(--main-blue) !important; color: white !important; }
+        .btn-primary:hover { background-color: var(--hover-blue) !important; border-color: var(--hover-blue) !important; }
+        .text-primary-custom { color: var(--main-blue) !important; }
+        
         .hidden { display: none !important; }
         .card { border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: none; }
         
         /* เมนูด้านซ้าย */
         .sidebar-menu .nav-link { color: #495057; font-weight: 500; border-radius: 8px; margin-bottom: 8px; padding: 12px 20px; }
-        .sidebar-menu .nav-link.active { background-color: #0d6efd; color: #fff; }
+        .sidebar-menu .nav-link.active { background-color: var(--main-blue) !important; color: #fff !important; }
         .sidebar-menu .nav-link:hover:not(.active) { background-color: #e9ecef; }
         
         /* กล้องและกรอบนำสายตา */
         #cameraContainer { width: 100%; border-radius: 12px; background: #000; overflow: hidden; position: relative; min-height: 300px; display: flex; align-items: center; justify-content: center;}
         #cameraFeed, #capturedImage { width: 100%; max-height: 400px; object-fit: cover; display: block; }
         
-        /* กรอบตรงกลางเพื่อให้ผู้ใช้เล็งลิ้น */
-        .target-box { position: absolute; width: 120px; height: 120px; border: 2px dashed #0dcaf0; border-radius: 50%; z-index: 5; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.4); pointer-events: none; }
+        /* กรอบตรงกลางเพื่อให้ผู้ใช้เล็งลิ้น (เปลี่ยนสีเส้นประเป็นสีน้ำเงิน) */
+        .target-box { position: absolute; width: 120px; height: 120px; border: 3px dashed var(--main-blue); border-radius: 50%; z-index: 5; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.4); pointer-events: none; }
     </style>
 </head>
 <body>
@@ -35,7 +46,7 @@
                 <img src="https://img5.pic.in.th/file/secure-sv1/tongueCheck.th.jpg" alt="Logo" width="40" height="40" class="rounded-circle me-2 shadow-sm" style="object-fit: cover;">
                 Tongue Check
             </span>
-            <button id="btnLogout" class="btn btn-light btn-sm hidden fw-bold text-primary">ออกจากระบบ</button>
+            <button id="btnLogout" class="btn btn-light btn-sm hidden fw-bold text-primary-custom">ออกจากระบบ</button>
         </div>
     </nav>
 
@@ -51,21 +62,21 @@
                 </div>
                 
                 <div id="loginView" class="card p-4 hidden">
-                    <h4 class="text-center mb-4">เข้าสู่ระบบ</h4>
+                    <h4 class="text-center mb-4 text-primary-custom">เข้าสู่ระบบ</h4>
                     <form id="loginForm">
                         <div class="mb-3"><input type="email" id="loginEmail" class="form-control" required placeholder="อีเมล"></div>
                         <div class="mb-3"><input type="password" id="loginPassword" class="form-control" required placeholder="รหัสผ่าน"></div>
                         <button type="submit" class="btn btn-primary w-100 mb-2 py-2">ล็อกอินเข้าใช้งาน</button>
-                        <button type="button" class="btn btn-link w-100 btnBackToWelcome text-decoration-none">กลับไปหน้าแรก</button>
+                        <button type="button" class="btn btn-link w-100 btnBackToWelcome text-decoration-none text-muted">กลับไปหน้าแรก</button>
                     </form>
                 </div>
                 <div id="registerView" class="card p-4 hidden">
-                    <h4 class="text-center mb-4">สมัครสมาชิก</h4>
+                    <h4 class="text-center mb-4 text-primary-custom">สมัครสมาชิก</h4>
                     <form id="registerForm">
                         <div class="mb-3"><input type="email" id="regEmail" class="form-control" required placeholder="อีเมล"></div>
                         <div class="mb-3"><input type="password" id="regPassword" class="form-control" required placeholder="รหัสผ่าน"></div>
                         <button type="submit" class="btn btn-success w-100 mb-2 py-2">ยืนยันการสมัคร</button>
-                        <button type="button" class="btn btn-link w-100 btnBackToWelcome text-decoration-none">กลับไปหน้าแรก</button>
+                        <button type="button" class="btn btn-link w-100 btnBackToWelcome text-decoration-none text-muted">กลับไปหน้าแรก</button>
                     </form>
                 </div>
             </div>
@@ -89,7 +100,7 @@
                         
                         <div class="tab-pane fade show active" id="nav-camera">
                             <div class="card p-4">
-                                <h4 class="mb-3">วิเคราะห์ลิ้นจากค่าสี (RGB/HSV)</h4>
+                                <h4 class="mb-3 text-primary-custom">วิเคราะห์ลิ้นจากค่าสี (RGB/HSV)</h4>
                                 <p class="text-muted">โปรดแลบลิ้นให้อยู่ตรงกลางกรอบวงกลม เพื่อให้ระบบประมวลผลพิกเซลได้แม่นยำที่สุด</p>
                                 
                                 <div id="cameraContainer" class="mb-3 shadow-sm">
@@ -102,7 +113,7 @@
 
                                 <div class="d-flex justify-content-between mb-3">
                                     <button type="button" id="btnSwitchCamera" class="btn btn-outline-secondary">🔄 สลับกล้อง</button>
-                                    <button type="button" id="btnCapture" class="btn btn-info text-white px-5 fw-bold shadow-sm">📸 ถ่ายภาพ</button>
+                                    <button type="button" id="btnCapture" class="btn btn-primary px-5 fw-bold shadow-sm">📸 ถ่ายภาพ</button>
                                     <button type="button" id="btnRetake" class="btn btn-warning hidden px-4">🔄 ถ่ายใหม่</button>
                                 </div>
                                 <hr>
@@ -112,7 +123,7 @@
 
                         <div class="tab-pane fade" id="nav-history">
                             <div class="card p-4">
-                                <h4 class="mb-3">ประวัติการวิเคราะห์</h4>
+                                <h4 class="mb-3 text-primary-custom">ประวัติการวิเคราะห์</h4>
                                 <div class="table-responsive">
                                     <table class="table table-hover align-middle">
                                         <thead class="table-light">
@@ -132,8 +143,8 @@
                         <div class="tab-pane fade" id="nav-planner">
                             <div class="row">
                                 <div class="col-md-5 mb-3">
-                                    <div class="card p-4 bg-light">
-                                        <h5 class="mb-3 text-primary">➕ เพิ่มกำหนดการใหม่</h5>
+                                    <div class="card p-4 bg-light border-0">
+                                        <h5 class="mb-3 text-primary-custom">➕ เพิ่มกำหนดการใหม่</h5>
                                         <form id="plannerForm">
                                             <div class="mb-2"><input type="date" id="planDate" class="form-control" required></div>
                                             <div class="mb-2"><input type="time" id="planTime" class="form-control" required></div>
@@ -143,11 +154,11 @@
                                     </div>
                                 </div>
                                 <div class="col-md-7">
-                                    <div class="card p-4">
-                                        <h4 class="mb-3">ตารางของฉัน</h4>
+                                    <div class="card p-4 border-0">
+                                        <h4 class="mb-3 text-primary-custom">ตารางของฉัน</h4>
                                         <div class="table-responsive">
                                             <table class="table table-bordered">
-                                                <thead class="table-primary text-center">
+                                                <thead class="text-center" style="background-color: #003399; color: white;">
                                                     <tr><th>วัน/เวลา</th><th>กิจกรรม</th><th>จัดการ</th></tr>
                                                 </thead>
                                                 <tbody id="plannerTableBody"></tbody>
@@ -167,9 +178,9 @@
     <div class="modal fade" id="resultModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
-                <div class="modal-header">
+                <div class="modal-header" style="background-color: #003399; color: white;">
                     <h5 class="modal-title fw-bold">📊 ผลการวิเคราะห์จากพิกเซล</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4">
                     <div class="row">
@@ -217,19 +228,56 @@
 
         const authSection = document.getElementById('authSection'), appSection = document.getElementById('appSection');
         const welcomeView = document.getElementById('welcomeView'), loginView = document.getElementById('loginView'), registerView = document.getElementById('registerView');
+        
         document.getElementById('btnShowLogin').onclick = () => { welcomeView.classList.add('hidden'); loginView.classList.remove('hidden'); };
         document.getElementById('btnShowRegister').onclick = () => { welcomeView.classList.add('hidden'); registerView.classList.remove('hidden'); };
         document.querySelectorAll('.btnBackToWelcome').forEach(btn => btn.onclick = () => { loginView.classList.add('hidden'); registerView.classList.add('hidden'); welcomeView.classList.remove('hidden'); });
         
-        document.getElementById('registerForm').onsubmit = (e) => { e.preventDefault(); createUserWithEmailAndPassword(auth, document.getElementById('regEmail').value, document.getElementById('regPassword').value).then(() => { alert("สมัครสำเร็จ"); signOut(auth); location.reload(); }); };
-        document.getElementById('loginForm').onsubmit = (e) => { e.preventDefault(); signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPassword').value); };
-        document.getElementById('btnLogout').onclick = () => signOut(auth);
+        document.getElementById('registerForm').onsubmit = (e) => { 
+            e.preventDefault(); 
+            createUserWithEmailAndPassword(auth, document.getElementById('regEmail').value, document.getElementById('regPassword').value)
+            .then(() => { alert("สมัครสำเร็จ"); signOut(auth); location.reload(); })
+            .catch(error => alert("เกิดข้อผิดพลาด: " + error.message)); 
+        };
+        
+        document.getElementById('loginForm').onsubmit = (e) => { 
+            e.preventDefault(); 
+            signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPassword').value)
+            .catch(error => alert("ล็อกอินไม่สำเร็จ: " + error.message)); 
+        };
+        
+        document.getElementById('btnLogout').onclick = () => { 
+            signOut(auth).then(() => location.reload()); 
+        };
 
+        // 🟢 แก้บั๊กหน้าจอกระพริบตรงนี้ 🟢
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                currentUserUid = user.uid; authSection.classList.add('hidden'); appSection.classList.remove('hidden'); document.getElementById('btnLogout').classList.remove('hidden');
-                loadHistory(); loadPlanner(); startCamera();
-            } else { location.reload(); }
+                // ถ้าล็อกอินแล้ว แสดงหน้า App ซ่อนหน้า Auth
+                currentUserUid = user.uid; 
+                authSection.classList.add('hidden'); 
+                appSection.classList.remove('hidden'); 
+                document.getElementById('btnLogout').classList.remove('hidden');
+                loadHistory(); 
+                loadPlanner(); 
+                startCamera();
+            } else { 
+                // ถ้าไม่ได้ล็อกอิน แสดงหน้า Auth ซ่อนหน้า App
+                currentUserUid = null;
+                authSection.classList.remove('hidden'); 
+                appSection.classList.add('hidden'); 
+                document.getElementById('btnLogout').classList.add('hidden');
+                
+                // คืนค่าหน้าเริ่มต้น
+                welcomeView.classList.remove('hidden');
+                loginView.classList.add('hidden');
+                registerView.classList.add('hidden');
+
+                // ปิดกล้องถ้าเปิดอยู่ตอนไม่ได้ล็อกอิน
+                if (currentStream) {
+                    currentStream.getTracks().forEach(track => track.stop());
+                }
+            }
         });
 
         // --- CAMERA LOGIC ---
@@ -243,7 +291,7 @@
         async function startCamera() {
             capturedImage.classList.add('hidden'); video.classList.remove('hidden'); targetBox.classList.remove('hidden');
             btnRetake.classList.add('hidden'); btnCapture.classList.remove('hidden'); btnAutoAnalyze.disabled = true; 
-            try { currentStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facingMode } }); video.srcObject = currentStream; } catch (err) {}
+            try { currentStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facingMode } }); video.srcObject = currentStream; } catch (err) { console.log("ไม่สามารถเปิดกล้องได้"); }
         }
         document.getElementById('btnSwitchCamera').onclick = () => { facingMode = facingMode === "user" ? "environment" : "user"; startCamera(); };
 
@@ -387,12 +435,24 @@
         }
         window.deleteRecord = (key) => remove(ref(db, `users/${currentUserUid}/history/${key}`));
 
-        document.getElementById('plannerForm').onsubmit = (e) => { e.preventDefault(); push(ref(db, `users/${currentUserUid}/planner_events`), { date: document.getElementById('planDate').value, time: document.getElementById('planTime').value, task: document.getElementById('planTask').value }).then(() => document.getElementById('plannerForm').reset()); };
+        document.getElementById('plannerForm').onsubmit = (e) => { 
+            e.preventDefault(); 
+            push(ref(db, `users/${currentUserUid}/planner_events`), { 
+                date: document.getElementById('planDate').value, 
+                time: document.getElementById('planTime').value, 
+                task: document.getElementById('planTask').value 
+            }).then(() => document.getElementById('plannerForm').reset()); 
+        };
+
         function loadPlanner() {
             onValue(ref(db, `users/${currentUserUid}/planner_events`), (snapshot) => {
-                const tbody = document.getElementById('plannerTableBody'); tbody.innerHTML = "";
+                const tbody = document.getElementById('plannerTableBody'); 
+                tbody.innerHTML = "";
                 if (snapshot.val()) {
-                    Object.keys(snapshot.val()).forEach(k => { let ev = snapshot.val()[k]; tbody.innerHTML += `<tr><td>${ev.date} ${ev.time}</td><td>${ev.task}</td><td><button class="btn btn-sm btn-danger" onclick="deletePlan('${k}')">ลบ</button></td></tr>`; });
+                    Object.keys(snapshot.val()).forEach(k => { 
+                        let ev = snapshot.val()[k]; 
+                        tbody.innerHTML += `<tr><td>${ev.date} ${ev.time}</td><td>${ev.task}</td><td><button class="btn btn-sm btn-danger" onclick="deletePlan('${k}')">ลบ</button></td></tr>`; 
+                    });
                 }
             });
         }
