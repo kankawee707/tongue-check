@@ -13,7 +13,8 @@
         .bg-primary-custom { background-color: #0d6efd !important; color: white; }
         .hidden { display: none !important; }
         .card { border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: none; }
-        #cameraFeed { width: 100%; border-radius: 8px; background: #000; object-fit: cover; }
+        #cameraContainer { width: 100%; border-radius: 8px; background: #000; overflow: hidden; position: relative; min-height: 250px; }
+        #cameraFeed, #capturedImage { width: 100%; max-height: 350px; object-fit: cover; display: block; }
         .planner-textarea { resize: none; height: 150px; }
     </style>
 </head>
@@ -33,7 +34,6 @@
         
         <div id="authSection" class="row justify-content-center">
             <div class="col-md-5">
-                
                 <div id="welcomeView" class="card p-4 text-center">
                     <img src="https://img5.pic.in.th/file/secure-sv1/tongueCheck.jpg" alt="TongueCheck Logo" class="mx-auto mb-3 rounded-circle shadow" style="width: 120px; height: 120px; object-fit: cover;">
                     <h3 class="mb-4">ยินดีต้อนรับสู่ TongueCheck</h3>
@@ -61,7 +61,6 @@
                         <button type="button" class="btn btn-link w-100 btnBackToWelcome text-decoration-none">กลับไปหน้าแรก</button>
                     </form>
                 </div>
-
             </div>
         </div>
 
@@ -71,22 +70,41 @@
                 <div class="col-md-5 mb-4">
                     <div class="card p-4 mb-3">
                         <h5 class="mb-3">ถ่ายภาพลิ้นเพื่อวิเคราะห์</h5>
-                        <video id="cameraFeed" autoplay playsinline></video>
-                        <div class="d-flex justify-content-between mt-2">
-                            <button id="btnSwitchCamera" class="btn btn-secondary btn-sm">🔄 สลับกล้อง (หน้า/หลัง)</button>
+                        
+                        <div id="cameraContainer" class="mb-3 shadow-sm">
+                            <video id="cameraFeed" autoplay playsinline></video>
+                            <img id="capturedImage" class="hidden" alt="ภาพถ่ายที่จับได้">
+                            <canvas id="canvas" class="hidden"></canvas>
                         </div>
+
+                        <div class="d-flex justify-content-between mb-3">
+                            <button type="button" id="btnSwitchCamera" class="btn btn-secondary btn-sm">🔄 สลับกล้อง</button>
+                            <button type="button" id="btnCapture" class="btn btn-info btn-sm text-white px-4">📸 ถ่ายภาพ</button>
+                            <button type="button" id="btnRetake" class="btn btn-warning btn-sm hidden px-4">🔄 ถ่ายใหม่</button>
+                        </div>
+                        
                         <hr>
+                        
                         <form id="analysisForm">
                             <div class="mb-3">
-                                <label class="form-label">ระบุสีของลิ้นที่สังเกตเห็น</label>
+                                <label class="form-label text-muted" style="font-size: 0.9em;">1. เลือกลักษณะ "สี" ของลิ้น</label>
                                 <select id="tongueColor" class="form-select" required>
                                     <option value="ชมพู (ปกติ)">ชมพู (ปกติ)</option>
                                     <option value="แดง (อักเสบ)">แดง (อักเสบ/ความร้อน)</option>
                                     <option value="ซีด (เลือดจาง)">ซีด (เลือดจาง)</option>
-                                    <option value="มีฝ้าขาวหนา">มีฝ้าขาวหนา (ติดเชื้อรา/กระเพาะอาหาร)</option>
+                                    <option value="มีฝ้าขาวหนา">มีฝ้าขาวหนา (ติดเชื้อรา)</option>
                                 </select>
                             </div>
-                            <button type="submit" class="btn btn-primary w-100">บันทึกและวิเคราะห์ผล</button>
+                            <div class="mb-3">
+                                <label class="form-label text-muted" style="font-size: 0.9em;">2. เลือกลักษณะ "รอยแตก/พื้นผิว"</label>
+                                <select id="tongueTexture" class="form-select" required>
+                                    <option value="เรียบเนียน (ปกติ)">เรียบเนียน (ปกติ)</option>
+                                    <option value="มีรอยแตก (Cracked)">มีรอยแตกตรงกลาง หรือทั่วลิ้น</option>
+                                    <option value="มีรอยหยักขอบลิ้น (Scalloped)">มีรอยหยักคล้ายรอยฟันกัดที่ขอบลิ้น</option>
+                                    <option value="มีตุ่มจุดแดง (Strawberry)">มีตุ่มจุดแดงนูนคล้ายสตรอเบอร์รี่</option>
+                                </select>
+                            </div>
+                            <button type="submit" id="btnAnalyze" class="btn btn-primary w-100" disabled>วิเคราะห์และบันทึกผล</button>
                         </form>
                     </div>
 
@@ -106,7 +124,7 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th style="min-width: 100px;">วันที่/เวลา</th>
-                                        <th style="min-width: 120px;">สี/อาการ</th>
+                                        <th style="min-width: 140px;">สี และ ลักษณะ</th>
                                         <th style="min-width: 150px;">ความเสี่ยง/โรค</th>
                                         <th style="min-width: 200px;">วิธีแก้/คำแนะนำ</th>
                                         <th>จัดการ</th>
@@ -123,13 +141,39 @@
 
     </div>
 
+    <div class="modal fade" id="resultModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold">ผลการวิเคราะห์สุขภาพลิ้น</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="resultStatus" class="alert text-center fw-bold mb-3 fs-5"></div>
+                    
+                    <div id="resultDetails" class="p-3 bg-light rounded" style="font-size: 0.95em;">
+                        <p class="mb-2"><strong>🔍 ลักษณะที่พบ:</strong> <br><span id="resDescription" class="text-secondary" style="white-space: pre-line;"></span></p>
+                        <p class="mb-2"><strong>⚠️ สาเหตุที่เป็นไปได้:</strong> <br><span id="resCause" class="text-secondary" style="white-space: pre-line;"></span></p>
+                        <hr>
+                        <p class="mb-0 text-primary"><strong>💡 การดูแลและการแก้ไขเบื้องต้น:</strong></p>
+                        <p id="resRemedy" class="mt-1 text-dark" style="white-space: pre-line;"></p>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">รับทราบและปิดหน้าต่าง</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getDatabase, ref, push, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // คอนฟิก Firebase ของคุณ
         const firebaseConfig = {
             apiKey: "AIzaSyAT_a_mJqgA4BpJAHsdnFG8DbitAWUoLko",
             authDomain: "tonguecheck.firebaseapp.com",
@@ -142,10 +186,8 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
         const auth = getAuth(app);
         const db = getDatabase(app);
-
         let currentUserUid = null;
 
         const authSection = document.getElementById('authSection');
@@ -155,7 +197,7 @@
         const loginView = document.getElementById('loginView');
         const registerView = document.getElementById('registerView');
 
-        // ================= AUTHENTICATION =================
+        // Authentication
         document.getElementById('btnShowLogin').onclick = () => { welcomeView.classList.add('hidden'); loginView.classList.remove('hidden'); };
         document.getElementById('btnShowRegister').onclick = () => { welcomeView.classList.add('hidden'); registerView.classList.remove('hidden'); };
         document.querySelectorAll('.btnBackToWelcome').forEach(btn => btn.onclick = () => {
@@ -167,12 +209,12 @@
             const email = document.getElementById('regEmail').value;
             const password = document.getElementById('regPassword').value;
             createUserWithEmailAndPassword(auth, email, password).then(() => {
-                alert("สมัครสมาชิกสำเร็จ! กรุณาเข้าสู่ระบบอีกครั้งเพื่อเริ่มต้นใช้งาน");
+                alert("สมัครสมาชิกสำเร็จ!");
                 signOut(auth);
                 document.getElementById('registerForm').reset();
                 registerView.classList.add('hidden');
                 loginView.classList.remove('hidden');
-            }).catch(err => alert("เกิดข้อผิดพลาดในการสมัคร: " + err.message));
+            }).catch(err => alert("เกิดข้อผิดพลาด: " + err.message));
         };
 
         document.getElementById('loginForm').onsubmit = (e) => {
@@ -206,19 +248,27 @@
             }
         });
 
-        // ================= CAMERA SYSTEM =================
+        // Camera System
         const video = document.getElementById('cameraFeed');
+        const canvas = document.getElementById('canvas');
+        const capturedImage = document.getElementById('capturedImage');
+        const btnCapture = document.getElementById('btnCapture');
+        const btnRetake = document.getElementById('btnRetake');
+        const btnAnalyze = document.getElementById('btnAnalyze');
         let currentStream;
         let facingMode = "user";
 
         async function startCamera() {
             stopCamera();
+            capturedImage.classList.add('hidden');
+            video.classList.remove('hidden');
+            btnRetake.classList.add('hidden');
+            btnCapture.classList.remove('hidden');
+            btnAnalyze.disabled = true; 
             try {
                 currentStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facingMode } });
                 video.srcObject = currentStream;
-            } catch (err) {
-                console.error("ไม่สามารถเข้าถึงกล้องได้: ", err);
-            }
+            } catch (err) { console.error("ไม่สามารถเข้าถึงกล้องได้: ", err); }
         }
 
         function stopCamera() {
@@ -230,21 +280,130 @@
             startCamera();
         };
 
-        // ================= ANALYSIS & HISTORY =================
-        function analyzeTongue(color) {
-            if (color === "แดง (อักเสบ)") return { disease: "ร้อนใน / ติดเชื้อ / ขาดวิตามินบี", remedy: "ดื่มน้ำให้เพียงพอ, พักผ่อน, ทานวิตามินบี" };
-            if (color === "ซีด (เลือดจาง)") return { disease: "ภาวะเลือดจาง / อ่อนเพลีย", remedy: "ทานอาหารเสริมธาตุเหล็ก, พักผ่อนให้เพียงพอ" };
-            if (color === "มีฝ้าขาวหนา") return { disease: "เชื้อราในช่องปาก / ระบบย่อยอาหารมีปัญหา", remedy: "แปรงลิ้นให้สะอาด, ทานโยเกิร์ต, ลดของหวาน" };
-            return { disease: "ปกติ (ไม่มีความเสี่ยง)", remedy: "รักษาสุขอนามัยช่องปากตามปกติ" };
+        btnCapture.onclick = () => {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            capturedImage.src = canvas.toDataURL('image/jpeg');
+            video.classList.add('hidden');
+            capturedImage.classList.remove('hidden');
+            btnCapture.classList.add('hidden');
+            btnRetake.classList.remove('hidden');
+            btnAnalyze.disabled = false; 
+        };
+
+        btnRetake.onclick = () => {
+            capturedImage.classList.add('hidden');
+            video.classList.remove('hidden');
+            btnRetake.classList.add('hidden');
+            btnCapture.classList.remove('hidden');
+            btnAnalyze.disabled = true;
+        };
+
+        // ================= ANALYSIS LOGIC (ข้อมูลทางการแพทย์จริง) =================
+        function analyzeTongue(color, texture) {
+            let diseases = [];
+            let descriptions = [];
+            let causes = [];
+            let remedies = [];
+
+            // 1. วิเคราะห์สี
+            if (color === "แดง (อักเสบ)") {
+                diseases.push("อักเสบ/ขาดวิตามิน");
+                descriptions.push("- ลิ้นมีสีแดงจัดผิดปกติ");
+                causes.push("- ร่างกายมีความร้อนสะสม, ติดเชื้อ, หรือขาดวิตามินบี 12 และกรดโฟลิก");
+                remedies.push("- ทานอาหารกลุ่มวิตามินบี (เนื้อสัตว์, ไข่) ดื่มน้ำให้เพียงพอ และพักผ่อน");
+            } else if (color === "ซีด (เลือดจาง)") {
+                diseases.push("ภาวะโลหิตจาง/อ่อนเพลีย");
+                descriptions.push("- ลิ้นมีสีซีด ขาดความอมชมพู");
+                causes.push("- ระบบไหลเวียนเลือดไม่ดี, ขาดธาตุเหล็ก, หรือม้ามและเลือดลมพร่อง");
+                remedies.push("- ทานอาหารเสริมธาตุเหล็ก (ตับ, เนื้อแดง, ผักใบเขียวเข้ม) และนอนหลับให้เพียงพอ");
+            } else if (color === "มีฝ้าขาวหนา") {
+                diseases.push("เชื้อราในช่องปาก/ระบบย่อยอาหาร");
+                descriptions.push("- มีฝ้าสีขาวเกาะหนาบนผิวลิ้น เช็ดออกยาก");
+                causes.push("- สุขอนามัยช่องปากไม่ดี, ติดเชื้อรา (Oral Thrush), หรือกระเพาะอาหารทำงานหนัก");
+                remedies.push("- ใช้ที่แปรงลิ้นทำความสะอาด ดื่มน้ำมากๆ หากฝ้าหนาและเจ็บควรพบแพทย์");
+            }
+
+            // 2. วิเคราะห์รอยแตก/พื้นผิว
+            if (texture === "มีรอยแตก (Cracked)") {
+                diseases.push("ร่องลิ้นลึก/ขาดน้ำ");
+                descriptions.push("- มีรอยแยกหรือร่องลึกบนผิวลิ้น (Fissured Tongue)");
+                causes.push("- อาจเป็นกรรมพันธุ์, ร่างกายขาดน้ำเรื้อรัง, ขาดวิตามินบี หรือมีภาวะปากแห้ง");
+                remedies.push("- จิบน้ำบ่อยๆ ตลอดวัน แปรงทำความสะอาดตามร่องลิ้นเพื่อป้องกันเศษอาหารและแบคทีเรียสะสม");
+            } else if (texture === "มีรอยหยักขอบลิ้น (Scalloped)") {
+                diseases.push("ภาวะลิ้นบวม/ไทรอยด์ทำงานต่ำ");
+                descriptions.push("- ขอบลิ้นเป็นรอยหยักโค้งคล้ายรอยฟันกัด (Scalloped Tongue)");
+                causes.push("- ลิ้นบวมโตไปดันซี่ฟัน อาจเกิดจากภาวะไทรอยด์ต่ำ (Hypothyroidism), นอนกัดฟัน, ขาดน้ำ หรือม้ามอ่อนแอ");
+                remedies.push("- ดื่มน้ำให้เพียงพอ หากมีอาการอ่อนเพลียหรือน้ำหนักขึ้นผิดปกติร่วมด้วย ควรเจาะเลือดตรวจไทรอยด์");
+            } else if (texture === "มีตุ่มจุดแดง (Strawberry)") {
+                diseases.push("ติดเชื้อแบคทีเรีย/แพ้อาหาร");
+                descriptions.push("- มีตุ่มสีแดงนูนขึ้นมาทั่วลิ้นคล้ายผิวสตรอเบอร์รี่");
+                causes.push("- ต่อมรับรสอักเสบ อาจเกิดจากการติดเชื้อสเตรปโตคอคคัส (ไข้อีดำอีแดง), โรคคาวาซากิ หรือแพ้ยา");
+                remedies.push("- หากมีไข้สูง ผื่นแดง หรือเจ็บคอร่วมด้วย ควรรีบพบแพทย์ทันที เพื่อรับยาปฏิชีวนะ");
+            }
+
+            // 3. สรุปผล
+            if (diseases.length === 0) {
+                return {
+                    isNormal: true,
+                    disease: "ปกติ (สุขภาพดี)",
+                    description: "สีลิ้นและลักษณะพื้นผิวดูเรียบเนียน อมชมพูตามธรรมชาติ",
+                    cause: "ดูแลสุขภาพช่องปากและร่างกายได้ดีเยี่ยม ระบบเลือดและทางเดินอาหารปกติ",
+                    remedy: "แปรงฟันและแปรงลิ้นเป็นประจำ ดื่มน้ำให้เพียงพอเพื่อรักษาสุขภาพที่ดีแบบนี้ต่อไป"
+                };
+            }
+
+            return {
+                isNormal: false,
+                disease: "เสี่ยงเป็น: " + diseases.join(" และ "),
+                description: descriptions.join("\n"),
+                cause: causes.join("\n"),
+                remedy: remedies.join("\n")
+            };
         }
 
+        // เมื่อกดปุ่มวิเคราะห์
         document.getElementById('analysisForm').onsubmit = (e) => {
             e.preventDefault();
             if (!currentUserUid) return;
+            
             const color = document.getElementById('tongueColor').value;
+            const texture = document.getElementById('tongueTexture').value;
             const date = new Date().toLocaleString('th-TH');
-            const result = analyzeTongue(color);
-            push(ref(db, `users/${currentUserUid}/history`), { date, color, disease: result.disease, remedy: result.remedy });
+            
+            // เรียกฟังก์ชันประมวลผล
+            const result = analyzeTongue(color, texture);
+            
+            // บันทึกลงฐานข้อมูล Firebase
+            push(ref(db, `users/${currentUserUid}/history`), { 
+                date, color, texture, 
+                disease: result.disease, 
+                remedy: result.remedy.replace(/\n/g, " ") // เซฟลงตารางเป็นบรรทัดเดียว
+            }).then(() => {
+                
+                // จัดการแสดงผล Modal Popup
+                const statusBox = document.getElementById('resultStatus');
+                
+                if(result.isNormal) {
+                    statusBox.className = "alert text-center fw-bold mb-3 fs-5 alert-success";
+                    statusBox.innerHTML = "✅ สุขภาพลิ้นของคุณปกติและแข็งแรงดี!";
+                } else {
+                    statusBox.className = "alert text-center fw-bold mb-3 fs-5 alert-danger";
+                    statusBox.innerHTML = "⚠️ " + result.disease;
+                }
+
+                document.getElementById('resDescription').innerText = result.description;
+                document.getElementById('resCause').innerText = result.cause;
+                document.getElementById('resRemedy').innerText = result.remedy;
+
+                // สั่งให้ Popup เด้งขึ้นมา
+                const modal = new bootstrap.Modal(document.getElementById('resultModal'));
+                modal.show();
+
+                // รีเซ็ตกล้อง
+                btnRetake.click();
+            });
         };
 
         function loadHistory() {
@@ -257,9 +416,11 @@
                         const row = data[key];
                         const tr = document.createElement('tr');
                         const isNormal = row.disease.includes('ปกติ');
+                        const displayAttr = `<b>${row.color}</b><br><small class="text-muted">${row.texture}</small>`;
+
                         tr.innerHTML = `
                             <td><small>${row.date}</small></td>
-                            <td><b>${row.color}</b></td>
+                            <td>${displayAttr}</td>
                             <td class="${isNormal ? 'text-success' : 'text-danger fw-bold'}">${row.disease}</td>
                             <td><small>${row.remedy}</small></td>
                             <td><button class="btn btn-sm btn-outline-danger" onclick="deleteRecord('${key}')">ลบ</button></td>
