@@ -3,319 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TongueCheck Pro AI - Complete</title>
+    <title>TongueCheck Pro | AI Health Hub</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
-        :root { --p-blue: #0056b3; --a-yellow: #ffc107; --bg: #f8f9fa; }
-        body { font-family: 'Sarabun', sans-serif; background-color: var(--bg); }
-        .navbar { background: var(--p-blue) !important; border-bottom: 4px solid var(--a-yellow); }
-        .card { border-radius: 20px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        .btn-round { border-radius: 50px; font-weight: bold; padding: 12px 25px; transition: 0.3s; }
-        #video-container { position: relative; width: 100%; max-width: 400px; margin: auto; border-radius: 20px; overflow: hidden; border: 5px solid white; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-        #video { width: 100%; transform: scaleX(-1); background: #000; display: block; }
-        .nav-link-custom { cursor: pointer; padding: 20px; text-align: center; background: white; border-radius: 15px; border: 1px solid #eee; transition: 0.3s; }
-        .nav-link-custom:hover { transform: translateY(-5px); background: #f0f4f8; border-color: var(--p-blue); }
-        #chatBox { height: 300px; overflow-y: auto; background: #fff; padding: 15px; border-radius: 15px; border: 1px solid #eee; margin-bottom: 10px; }
+        :root { --primary-grad: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f8fafc; min-height: 100vh; }
+        .glass-card { background: white; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: none; }
+        .btn-modern { background: var(--primary-grad); color: white; border: none; border-radius: 12px; padding: 12px; font-weight: bold; transition: 0.3s; }
+        
+        /* Camera & Video */
+        #video-container { border-radius: 20px; overflow: hidden; background: #000; border: 5px solid white; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        video { width: 100%; transform: scaleX(-1); display: block; }
+
+        /* Floating Chatbot UI */
+        #chatbot-launcher { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%; background: var(--primary-grad); color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4); z-index: 1000; }
+        #chat-window { position: fixed; bottom: 100px; right: 30px; width: 350px; height: 450px; background: white; border-radius: 20px; display: none; flex-direction: column; box-shadow: 0 15px 40px rgba(0,0,0,0.15); z-index: 1000; overflow: hidden; }
+        #chat-messages { flex: 1; overflow-y: auto; padding: 15px; font-size: 0.9rem; }
+        .msg { margin-bottom: 10px; padding: 10px 15px; border-radius: 15px; max-width: 80%; }
+        .msg.bot { background: #f0f2f5; align-self: flex-start; }
+        .msg.user { background: var(--primary-grad); color: white; align-self: flex-end; margin-left: auto; }
+        
+        .d-none { display: none !important; }
     </style>
 </head>
 <body>
 
-<nav class="navbar navbar-dark shadow sticky-top">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="#" onclick="location.reload()">👅 TongueCheck Pro</a>
-        <button id="btnLogout" class="btn btn-outline-light btn-sm btn-round d-none" onclick="logout()">ออกจากระบบ</button>
-    </div>
-</nav>
-
-<div class="container py-4">
-
-    <div id="authSection" class="row justify-content-center pt-4">
-        <div class="col-md-5">
-            <div class="card p-4 text-center shadow-lg animate__animated animate__fadeIn">
-                <h3 id="authTitle" class="fw-bold mb-4">เข้าสู่ระบบ</h3>
-                <div id="authError" class="alert alert-danger d-none small"></div>
+<div class="container py-5">
+    <div id="mainSection" class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="glass-card p-4 text-center">
+                <h3 class="fw-bold text-primary mb-4">TongueCheck. AI</h3>
                 
-                <input type="email" id="email" class="form-control mb-3 btn-round" placeholder="อีเมล">
-                <input type="password" id="password" class="form-control mb-4 btn-round" placeholder="รหัสผ่าน (6 ตัวขึ้นไป)">
-                
-                <button id="mainAuthBtn" class="btn btn-primary w-100 mb-2 btn-round" onclick="handleAuth()">ตกลง</button>
-                
-                <div class="my-3 text-muted small">หรือ</div>
-                
-                <button class="btn btn-outline-dark w-100 mb-3 btn-round d-flex align-items-center justify-content-center" onclick="loginWithGoogle()">
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" class="me-2"> 
-                    เข้าสู่ระบบด้วย Google
-                </button>
-
-                <button id="btnSwitchMode" class="btn btn-link w-100 btn-sm text-decoration-none" onclick="toggleAuthMode()">สมัครสมาชิกใหม่</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="mainSection" class="d-none">
-        <div id="homePage" class="animate__animated animate__fadeIn">
-            <h4 class="fw-bold mb-4 text-center">สวัสดีคุณ <span id="userNameDisplay" class="text-primary">ผู้ใช้งาน</span></h4>
-            <div class="row g-3">
-                <div class="col-6 col-md-3"><div class="nav-link-custom shadow-sm" onclick="showPage('scan-tab')"><h3>📸</h3><b>วิเคราะห์ลิ้น</b></div></div>
-                <div class="col-6 col-md-3"><div class="nav-link-custom shadow-sm" onclick="showPage('plan-tab')"><h3>📅</h3><b>แพลนเนอร์</b></div></div>
-                <div class="col-6 col-md-3"><div class="nav-link-custom shadow-sm" onclick="showPage('history-tab')"><h3>📊</h3><b>สถิติ & ประวัติ</b></div></div>
-                <div class="col-6 col-md-3"><div class="nav-link-custom shadow-sm" onclick="showPage('chat-tab')"><h3>🤖</h3><b>คุยกับหมอ AI</b></div></div>
-            </div>
-        </div>
-
-        <div id="pageContent" class="d-none mt-3">
-            <button class="btn btn-light btn-round mb-4" onclick="showHome()">⬅️ กลับหน้าหลัก</button>
-
-            <div class="content-view d-none" id="scan-tab">
-                <div id="video-container"><video id="video" autoplay playsinline></video></div>
-                <div class="text-center mt-3">
-                    <button class="btn btn-danger btn-round px-5 shadow" onclick="startAIAnalysis()">🔬 วิเคราะห์สุขภาพลิ้น</button>
+                <div class="mb-3 text-start">
+                    <label class="small text-muted fw-bold">ระบุ API Key เพื่อเริ่มใช้งาน:</label>
+                    <input type="password" id="apiKeyInput" class="form-control mt-1" placeholder="วาง AIMLAPI Key ของคุณที่นี่">
                 </div>
-                <div id="resultOutput" class="mt-4"></div>
-                <canvas id="canvas" class="d-none" width="400" height="300"></canvas>
-            </div>
 
-            <div class="content-view d-none" id="plan-tab">
-                <div class="card p-4">
-                    <h5 class="fw-bold mb-3">📅 ตารางดูแลสุขภาพ</h5>
-                    <div class="input-group mb-3">
-                        <input type="text" id="planInput" class="form-control" placeholder="เช่น ดื่มน้ำเยอะๆ...">
-                        <button class="btn btn-primary px-4" onclick="addPlan()">เพิ่ม</button>
-                    </div>
-                    <ul id="planList" class="list-group list-group-flush"></ul>
+                <div id="video-container" class="mb-4">
+                    <video id="video" autoplay playsinline></video>
                 </div>
-            </div>
 
-            <div class="content-view d-none" id="history-tab">
-                <div class="card p-4 mb-3 text-center">
-                    <h5 class="fw-bold">📊 สรุปสุขภาพลิ้น</h5>
-                    <div style="max-width: 300px; margin: auto;">
-                        <canvas id="healthChart"></canvas>
-                    </div>
-                </div>
-                <div class="card p-4">
-                    <h5 class="fw-bold mb-3">⏳ ประวัติการวิเคราะห์</h5>
-                    <div id="historyData" class="small">กำลังโหลดข้อมูล...</div>
-                </div>
-            </div>
+                <button class="btn-modern w-100 py-3 mb-3" onclick="analyzeTongue()">🔬 วิเคราะห์ลิ้นด้วย AI</button>
 
-            <div class="content-view d-none" id="chat-tab">
-                <div class="card p-4 shadow-sm">
-                    <h5 class="fw-bold mb-3">🤖 ปรึกษาหมอ AI</h5>
-                    <div id="chatBox" class="small">
-                        <p class="text-primary"><b>🤖 หมอ AI:</b> สวัสดีค่ะ มีข้อสงสัยเรื่องลิ้น พิมพ์ถามได้เลยนะคะ (เช่น "ฝ้าขาว", "เจ็บลิ้น")</p>
-                    </div>
-                    <div class="input-group">
-                        <input type="text" id="chatInput" class="form-control" placeholder="พิมพ์คำถามที่นี่...">
-                        <button class="btn btn-primary px-4" onclick="sendChat()">ส่ง</button>
-                    </div>
+                <div id="resultBox" class="d-none p-3 rounded-4 text-start border-start border-5 border-primary shadow-sm" style="background: #f0f7ff;">
+                    <h6 class="fw-bold text-primary">🏥 ผลวิเคราะห์ AI:</h6>
+                    <div id="aiText" style="font-size: 0.9rem; line-height: 1.5;"></div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<script type="module">
-    // นำเข้า Firebase SDK
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, push, onValue, remove, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+<div id="chatbot-launcher" onclick="toggleChat()">💬</div>
 
-    // --- FIREBASE CONFIG (ใช้ของคุณ) ---
-    const firebaseConfig = {
-        apiKey: "AIzaSyAT_a_mJqgA4BpJAHsdnFG8DbitAWUoLko",
-        authDomain: "tonguecheck.firebaseapp.com",
-        databaseURL: "https://tonguecheck-default-rtdb.asia-southeast1.firebasedatabase.app",
-        projectId: "tonguecheck",
-        storageBucket: "tonguecheck.firebasestorage.app",
-        messagingSenderId: "278288057340",
-        appId: "1:278288057340:web:dcc14f73fa8806c0176879",
-        measurementId: "G-0DTTRQMXCK"
-    };
+<div id="chat-window" class="animate__animated">
+    <div class="p-3 bg-primary text-white fw-bold d-flex justify-content-between">
+        <span>🤖 หมอ AI ปรึกษาได้</span>
+        <span style="cursor:pointer" onclick="toggleChat()">✕</span>
+    </div>
+    <div id="chat-messages" class="d-flex flex-column">
+        <div class="msg bot">สวัสดีครับ! ผมเป็น AI ปรึกษาสุขภาพลิ้น มีคำถามอะไรถามได้เลยนะครับ</div>
+    </div>
+    <div class="p-2 border-top d-flex">
+        <input type="text" id="chatInput" class="form-control border-0" placeholder="พิมพ์คำถามที่นี่...">
+        <button class="btn btn-primary btn-sm ms-1" onclick="sendChatMessage()">ส่ง</button>
+    </div>
+</div>
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
-    const provider = new GoogleAuthProvider();
+<canvas id="canvas" class="d-none" width="640" height="480"></canvas>
 
-    let authMode = 'login';
-    let currentStream = null;
-    let healthChart = null;
+<script>
+    const video = document.getElementById('video');
+    const apiKeyInput = document.getElementById('apiKeyInput');
 
-    // --- ระบบยืนยันตัวตน ---
-    window.toggleAuthMode = () => {
-        authMode = (authMode === 'login') ? 'signup' : 'login';
-        document.getElementById('authTitle').innerText = (authMode === 'login') ? 'เข้าสู่ระบบ' : 'สมัครสมาชิกใหม่';
-        document.getElementById('btnSwitchMode').innerText = (authMode === 'login') ? 'สมัครสมาชิกใหม่' : 'มีบัญชีอยู่แล้ว? เข้าสู่ระบบ';
-        document.getElementById('authError').classList.add('d-none');
-    };
+    // 1. เปิดกล้อง
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => video.srcObject = stream)
+        .catch(() => alert("เข้าถึงกล้องไม่ได้"));
 
-    window.handleAuth = async () => {
-        const em = document.getElementById('email').value;
-        const pw = document.getElementById('password').value;
-        const err = document.getElementById('authError');
+    // 2. ฟังก์ชันวิเคราะห์ลิ้น (Image Analysis)
+    async function analyzeTongue() {
+        const key = apiKeyInput.value;
+        if (!key) return alert("กรุณาใส่ API Key ก่อนครับ");
+
+        const btn = event.target;
+        btn.disabled = true;
+        btn.innerText = "กำลังวิเคราะห์...";
+
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const base64Img = canvas.toDataURL('image/jpeg').split(',')[1];
 
         try {
-            if (authMode === 'login') {
-                await signInWithEmailAndPassword(auth, em, pw);
-            } else {
-                await createUserWithEmailAndPassword(auth, em, pw);
-                alert("สมัครสมาชิกสำเร็จ! กรุณาล็อกอินเพื่อเข้าใช้งาน");
-                await signOut(auth); // ออกระบบก่อนเพื่อให้ล็อกอินใหม่ตามโจทย์
-                toggleAuthMode(); // สลับกลับหน้าล็อกอิน
-                document.getElementById('password').value = ""; // ล้างรหัสผ่าน
-            }
-        } catch (e) {
-            err.innerText = "เกิดข้อผิดพลาด: " + e.message;
-            err.classList.remove('d-none');
-        }
-    };
-
-    window.loginWithGoogle = async () => {
-        try {
-            await signInWithPopup(auth, provider);
-        } catch (e) { alert("Google Login ล้มเหลว: " + e.message); }
-    };
-
-    window.logout = () => signOut(auth);
-
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            document.getElementById('authSection').classList.add('d-none');
-            document.getElementById('mainSection').classList.remove('d-none');
-            document.getElementById('btnLogout').classList.remove('d-none');
-            document.getElementById('userNameDisplay').innerText = user.displayName || user.email;
-            syncData();
-        } else {
-            document.getElementById('authSection').classList.remove('d-none');
-            document.getElementById('mainSection').classList.add('d-none');
-            document.getElementById('btnLogout').classList.add('d-none');
-            stopCam();
-        }
-    });
-
-    // --- ระบบนำทาง ---
-    window.showPage = (id) => {
-        document.getElementById('homePage').classList.add('d-none');
-        document.getElementById('pageContent').classList.remove('d-none');
-        document.querySelectorAll('.content-view').forEach(v => v.classList.add('d-none'));
-        document.getElementById(id).classList.remove('d-none');
-        if(id === 'scan-tab') startCam(); else stopCam();
-    };
-
-    window.showHome = () => {
-        stopCam();
-        document.getElementById('homePage').classList.remove('d-none');
-        document.getElementById('pageContent').classList.add('d-none');
-    };
-
-    // --- ระบบกล้องและการวิเคราะห์ ---
-    async function startCam() {
-        try {
-            currentStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
-            document.getElementById('video').srcObject = currentStream;
-        } catch (e) { alert("เปิดกล้องไม่ได้: " + e.message); }
-    }
-
-    function stopCam() {
-        if(currentStream) currentStream.getTracks().forEach(t => t.stop());
-    }
-
-    window.startAIAnalysis = () => {
-        const v = document.getElementById('video');
-        const c = document.getElementById('canvas');
-        const ctx = c.getContext('2d');
-        ctx.drawImage(v, 0, 0, c.width, c.height);
-        
-        const pixels = ctx.getImageData(150, 100, 100, 100).data;
-        let r=0, g=0, b=0;
-        for(let i=0; i<pixels.length; i+=4) { r+=pixels[i]; g+=pixels[i+1]; b+=pixels[i+2]; }
-        const count = pixels.length/4;
-        const avgR=r/count, avgG=g/count, avgB=b/count;
-
-        let res = { disease: "ปกติ", type: "success", advice: "ลิ้นสุขภาพดี รักษาสุขอนามัยต่อไปค่ะ" };
-        if(avgG > 170 && avgR > 170) res = { disease: "พบคราบฝ้าขาว", type: "warning", advice: "ควรขูดลิ้นและดื่มน้ำเพิ่มขึ้น" };
-        else if(avgR > 210 && avgG < 150) res = { disease: "ลิ้นอักเสบ/แดง", type: "danger", advice: "ควรดื่มน้ำลดอุณหภูมิและพักผ่อน" };
-
-        document.getElementById('resultOutput').innerHTML = `<div class="card p-3 border-start border-5 border-${res.type}"><h5>${res.disease}</h5><p>${res.advice}</p></div>`;
-
-        push(ref(db, `users/${auth.currentUser.uid}/history`), {
-            date: new Date().toLocaleString('th-TH'),
-            disease: res.disease,
-            type: res.type
-        });
-    };
-
-    // --- ระบบฐานข้อมูล & กราฟ ---
-    function syncData() {
-        const userRef = ref(db, `users/${auth.currentUser.uid}`);
-        onValue(userRef, (snap) => {
-            const data = snap.val();
-            
-            // ประวัติและกราฟ
-            const hList = document.getElementById('historyData'); hList.innerHTML = "";
-            let stats = { "ปกติ": 0, "พบคราบฝ้าขาว": 0, "ลิ้นอักเสบ/แดง": 0 };
-            
-            if(data?.history) {
-                Object.values(data.history).reverse().forEach(h => {
-                    stats[h.disease] = (stats[h.disease] || 0) + 1;
-                    hList.innerHTML += `<div class="border-bottom py-1"><b>${h.date}</b>: ${h.disease}</div>`;
-                });
-                updateChart(stats);
-            } else hList.innerText = "ยังไม่มีประวัติ";
-
-            // แพลนเนอร์
-            const pList = document.getElementById('planList'); pList.innerHTML = "";
-            if(data?.plans) Object.entries(data.plans).forEach(([id, p]) => {
-                pList.innerHTML += `<li class="list-group-item d-flex justify-content-between align-items-center">${p.task} <button class="btn btn-sm text-danger" onclick="deleteItem('plans/${id}')">ลบ</button></li>`;
+            const response = await fetch("https://api.aimlapi.com/v1/chat/completions", {
+                method: "POST",
+                headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    model: "gpt-4o",
+                    messages: [
+                        {
+                            role: "user",
+                            content: [
+                                { type: "text", text: "วิเคราะห์ภาพลิ้นนี้ว่าปกติหรือไม่ และแนะนำเบื้องต้นเป็นภาษาไทย" },
+                                { type: "image_url", image_url: { url: `data:image/jpeg;base64,${base64Img}` } }
+                            ]
+                        }
+                    ]
+                })
             });
-        });
+            const data = await response.json();
+            document.getElementById('aiText').innerText = data.choices[0].message.content;
+            document.getElementById('resultBox').classList.remove('d-none');
+        } catch (e) { alert("Error: " + e.message); }
+        finally { btn.disabled = false; btn.innerText = "🔬 วิเคราะห์ลิ้นด้วย AI"; }
     }
 
-    function updateChart(stats) {
-        const ctx = document.getElementById('healthChart').getContext('2d');
-        if(healthChart) healthChart.destroy();
-        healthChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: Object.keys(stats),
-                datasets: [{ data: Object.values(stats), backgroundColor: ['#28a745', '#ffc107', '#dc3545'] }]
-            }
-        });
-    }
-
-    window.addPlan = () => {
-        const val = document.getElementById('planInput').value;
-        if(val) { push(ref(db, `users/${auth.currentUser.uid}/plans`), { task: val }); document.getElementById('planInput').value = ""; }
-    };
-
-    window.deleteItem = (path) => remove(ref(db, `users/${auth.currentUser.uid}/${path}`));
-
-    // --- ระบบแชท AI ---
-    window.sendChat = () => {
+    // 3. ฟังก์ชันแชทบอท (Text Chat)
+    async function sendChatMessage() {
         const input = document.getElementById('chatInput');
-        const box = document.getElementById('chatBox');
         const msg = input.value.trim();
-        if(!msg) return;
+        const key = apiKeyInput.value;
 
-        box.innerHTML += `<p class="text-end"><b>คุณ:</b> ${msg}</p>`;
-        
-        let reply = "หมอ AI ยังไม่แน่ใจเรื่องนี้ค่ะ ลองปรึกษาเรื่องฝ้าขาวหรือลิ้นอักเสบดูนะคะ";
-        if(msg.includes("ฝ้าขาว")) reply = "ฝ้าขาวมักเกิดจากคราบอาหารและแบคทีเรีย แนะนำให้ใช้ที่ขูดลิ้นทำความสะอาดทุกเช้าค่ะ";
-        if(msg.includes("เจ็บลิ้น") || msg.includes("แดง")) reply = "หากมีอาการลิ้นแดงหรือเจ็บ อาจเป็นสัญญาณของอาการร้อนใน ควรดื่มน้ำเยอะๆ และเลี่ยงของทอดค่ะ";
+        if (!msg) return;
+        if (!key) return alert("กรุณาใส่ API Key ในช่องด้านบนก่อนปรึกษา AI ครับ");
 
-        setTimeout(() => {
-            box.innerHTML += `<p class="text-start text-primary"><b>🤖 หมอ AI:</b> ${reply}</p>`;
-            box.scrollTop = box.scrollHeight;
-        }, 500);
+        // Add user msg to UI
+        addMessage(msg, 'user');
         input.value = "";
-    };
 
+        try {
+            const response = await fetch("https://api.aimlapi.com/v1/chat/completions", {
+                method: "POST",
+                headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    model: "gpt-4o",
+                    messages: [{ role: "user", content: "คุณคือแพทย์ผู้เชี่ยวชาญด้านช่องปาก ช่วยตอบคำถามนี้: " + msg }]
+                })
+            });
+            const data = await response.json();
+            addMessage(data.choices[0].message.content, 'bot');
+        } catch (e) { addMessage("ขออภัยครับ เกิดข้อผิดพลาด", 'bot'); }
+    }
+
+    function addMessage(text, side) {
+        const chatMessages = document.getElementById('chat-messages');
+        const div = document.createElement('div');
+        div.className = `msg ${side} animate__animated animate__fadeInUp`;
+        div.innerText = text;
+        chatMessages.appendChild(div);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function toggleChat() {
+        const win = document.getElementById('chat-window');
+        if(win.style.display === 'flex') {
+            win.classList.replace('animate__fadeInUp', 'animate__fadeOutDown');
+            setTimeout(() => win.style.display = 'none', 500);
+        } else {
+            win.style.display = 'flex';
+            win.classList.remove('animate__fadeOutDown');
+            win.classList.add('animate__fadeInUp');
+        }
+    }
 </script>
 </body>
 </html>
