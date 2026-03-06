@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TongueCheck Pro AI | Modern Health</title>
+    <title>TongueCheck Pro AI</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&family=Sarabun:wght@300;400;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -24,17 +24,290 @@
             color: var(--dark);
         }
 
-        /* Glassmorphism UI */
+        /* Glass UI */
         .glass-card {
             background: var(--glass);
             backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.4);
             border-radius: 30px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
         }
 
-        /* Modern Form Inputs */
+        /* Inputs */
         .form-control-modern {
+            background: rgba(255, 255, 255, 0.6);
+            border: 2px solid transparent;
+            border-radius: 16px;
+            padding: 14px 20px;
+            transition: 0.3s;
+        }
+        .form-control-modern:focus {
+            background: white;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+        /* Buttons */
+        .btn-modern {
+            background: var(--primary-grad);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            padding: 14px 28px;
+            font-weight: 700;
+            transition: 0.3s;
+        }
+        .btn-modern:hover { transform: translateY(-2px); color: white; opacity: 0.9; }
+
+        .btn-social {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 12px;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .btn-social:hover { background: #f8fafc; transform: translateY(-2px); }
+
+        /* Camera UI */
+        #video-container {
+            border-radius: 24px;
+            overflow: hidden;
+            border: 6px solid white;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            background: #000;
+        }
+        #video { width: 100%; transform: scaleX(-1); display: block; }
+
+        /* Dashboard Menu */
+        .menu-item {
+            cursor: pointer;
+            padding: 25px;
+            text-align: center;
+            border-radius: 24px;
+            background: white;
+            transition: 0.3s;
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+        .menu-item:hover { background: var(--primary-grad); color: white; transform: translateY(-5px); }
+        
+        .d-none { display: none !important; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-light bg-transparent py-4">
+    <div class="container d-flex justify-content-between">
+        <a class="navbar-brand fw-bold fs-3 text-primary" href="#" onclick="location.reload()">TongueCheck.</a>
+        <button id="btnLogout" class="btn btn-outline-danger btn-sm rounded-pill px-4 d-none" onclick="logout()">Logout</button>
+    </div>
+</nav>
+
+<div class="container pb-5">
+
+    <div id="loginView" class="auth-page row justify-content-center animate__animated animate__fadeIn">
+        <div class="col-md-5 col-lg-4">
+            <div class="glass-card p-4 p-md-5">
+                <h2 class="fw-bold mb-1">ยินดีต้อนรับ</h2>
+                <p class="text-muted small mb-4">เข้าสู่ระบบเพื่อเริ่มใช้งาน</p>
+                
+                <div id="loginError" class="alert alert-danger d-none rounded-4 small"></div>
+                
+                <input type="email" id="loginEmail" class="form-control-modern mb-3 w-100" placeholder="อีเมล">
+                <input type="password" id="loginPass" class="form-control-modern mb-4 w-100" placeholder="รหัสผ่าน">
+                
+                <button class="btn-modern w-100 mb-4" onclick="handleLogin()">เข้าสู่ระบบ</button>
+                
+                <div class="d-flex align-items-center mb-4">
+                    <hr class="flex-grow-1"> <span class="mx-3 text-muted small">หรือ</span> <hr class="flex-grow-1">
+                </div>
+
+                <div class="d-grid gap-2 mb-4">
+                    <button class="btn btn-social d-flex align-items-center justify-content-center" onclick="loginWithGoogle()">
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" class="me-2"> Login with Google
+                    </button>
+                    <button class="btn btn-social d-flex align-items-center justify-content-center text-muted" onclick="loginAnonymous()">
+                        <span class="me-2">👤</span> เข้าใช้งานแบบไม่ระบุตัวตน
+                    </button>
+                </div>
+
+                <p class="small text-center mb-0">ยังไม่มีบัญชี? <a href="#" class="text-primary fw-bold text-decoration-none" onclick="showView('signupView')">สมัครสมาชิกใหม่</a></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="signupView" class="auth-page d-none row justify-content-center animate__animated animate__fadeIn">
+        <div class="col-md-5 col-lg-4">
+            <div class="glass-card p-5">
+                <h2 class="fw-bold mb-2 text-primary">สมัครสมาชิก</h2>
+                <p class="text-muted small mb-4">สร้างบัญชีเพื่อบันทึกประวัติของคุณ</p>
+                <div id="signupError" class="alert alert-danger d-none rounded-4 small"></div>
+                <input type="email" id="regEmail" class="form-control-modern mb-3 w-100" placeholder="ระบุอีเมล">
+                <input type="password" id="regPass" class="form-control-modern mb-4 w-100" placeholder="ตั้งรหัสผ่าน 6 ตัวขึ้นไป">
+                <button class="btn-modern w-100 mb-3" onclick="handleSignup()">สมัครสมาชิก</button>
+                <button class="btn btn-link w-100 text-decoration-none text-muted small" onclick="showView('loginView')">ย้อนกลับไปล็อกอิน</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="mainSection" class="d-none animate__animated animate__fadeIn">
+        <div id="homePage">
+            <h1 class="fw-bold mb-0">Dashboard</h1>
+            <p class="text-muted mb-5">สวัสดีคุณ <span id="userNameDisplay" class="fw-bold text-primary">...</span></p>
+
+            <div class="row g-4">
+                <div class="col-6 col-md-3" onclick="showPage('scan-tab')"><div class="menu-item shadow-sm"><h3>📸</h3><b>สแกนลิ้น</b></div></div>
+                <div class="col-6 col-md-3" onclick="showPage('history-tab')"><div class="menu-item shadow-sm"><h3>📊</h3><b>ประวัติ</b></div></div>
+                <div class="col-6 col-md-3" onclick="showPage('chat-tab')"><div class="menu-item shadow-sm"><h3>🤖</h3><b>หมอ AI</b></div></div>
+            </div>
+        </div>
+
+        <div id="pageContent" class="d-none mt-4 animate__animated animate__fadeIn">
+            <button class="btn btn-light rounded-pill px-4 mb-4 shadow-sm" onclick="showHome()">← กลับหน้าหลัก</button>
+
+            <div class="content-view d-none" id="scan-tab">
+                <div class="row justify-content-center">
+                    <div class="col-lg-6 text-center">
+                        <div id="video-container" class="mb-4"><video id="video" autoplay playsinline></video></div>
+                        <button class="btn-modern px-5 py-3" onclick="startAIAnalysis()">🔬 วิเคราะห์สุขภาพลิ้น</button>
+                        <div id="resultOutput" class="mt-4"></div>
+                        <canvas id="canvas" class="d-none" width="400" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-view d-none" id="history-tab">
+                <div class="row g-4">
+                    <div class="col-md-5">
+                        <div class="glass-card p-4 text-center">
+                            <h5 class="fw-bold mb-4">ภาพรวมสุขภาพ</h5>
+                            <canvas id="healthChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-md-7">
+                        <div class="glass-card p-4">
+                            <h5 class="fw-bold mb-3">ประวัติการตรวจ</h5>
+                            <div id="historyData"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    // --- YOUR CONFIG ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyAT_a_mJqgA4BpJAHsdnFG8DbitAWUoLko",
+        authDomain: "tonguecheck.firebaseapp.com",
+        databaseURL: "https://tonguecheck-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "tonguecheck",
+        storageBucket: "tonguecheck.firebasestorage.app",
+        messagingSenderId: "278288057340",
+        appId: "1:278288057340:web:dcc14f73fa8806c0176879",
+        measurementId: "G-0DTTRQMXCK"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+    const provider = new GoogleAuthProvider();
+
+    // --- NAVIGATION LOGIC ---
+    window.showView = (id) => {
+        document.querySelectorAll('.auth-page, #mainSection').forEach(v => v.classList.add('d-none'));
+        document.getElementById(id).classList.remove('d-none');
+    };
+
+    window.showPage = (id) => {
+        document.getElementById('homePage').classList.add('d-none');
+        document.getElementById('pageContent').classList.remove('d-none');
+        document.querySelectorAll('.content-view').forEach(v => v.classList.add('d-none'));
+        document.getElementById(id).classList.remove('d-none');
+        if(id === 'scan-tab') startCam();
+    };
+
+    window.showHome = () => {
+        stopCam();
+        document.getElementById('homePage').classList.remove('d-none');
+        document.getElementById('pageContent').classList.add('d-none');
+    };
+
+    // --- AUTH ACTIONS ---
+    window.handleLogin = async () => {
+        try { await signInWithEmailAndPassword(auth, loginEmail.value, loginPass.value); }
+        catch (e) { loginError.classList.remove('d-none'); loginError.innerText = "อีเมลหรือรหัสผ่านไม่ถูกต้อง"; }
+    };
+
+    window.handleSignup = async () => {
+        try {
+            const email = regEmail.value;
+            await createUserWithEmailAndPassword(auth, email, regPass.value);
+            alert("สมัครสมาชิกสำเร็จ! กรุณาล็อกอินใหม่อีกครั้ง");
+            await signOut(auth); // ดีดกลับหน้า Login
+            showView('loginView');
+            document.getElementById('loginEmail').value = email;
+        } catch (e) { signupError.classList.remove('d-none'); signupError.innerText = e.message; }
+    };
+
+    window.loginWithGoogle = () => signInWithPopup(auth, provider);
+    window.loginAnonymous = () => signInAnonymously(auth);
+    window.logout = () => signOut(auth);
+
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            showView('mainSection');
+            document.getElementById('btnLogout').classList.remove('d-none');
+            document.getElementById('userNameDisplay').innerText = user.isAnonymous ? "Guest (ไม่ระบุตัวตน)" : (user.displayName || user.email);
+            syncData();
+        } else {
+            showView('loginView');
+            document.getElementById('btnLogout').classList.add('d-none');
+        }
+    });
+
+    // --- CAMERA & AI ---
+    let stream;
+    async function startCam() { try { stream = await navigator.mediaDevices.getUserMedia({video:true}); video.srcObject = stream; } catch(e){ alert("กล้องขัดข้อง"); } }
+    function stopCam() { if(stream) stream.getTracks().forEach(t => t.stop()); }
+
+    window.startAIAnalysis = () => {
+        resultOutput.innerHTML = `<div class="glass-card p-3 animate__animated animate__pulse infinite">กำลังสแกน...</div>`;
+        setTimeout(() => {
+            const res = { title: "ปกติ", color: "success", msg: "ลิ้นของคุณดูสุขภาพดีมาก รักษาสุขอนามัยต่อไปนะครับ" };
+            resultOutput.innerHTML = `
+                <div class="glass-card p-4 border-start border-5 border-success shadow">
+                    <h4 class="fw-bold text-success">${res.title}</h4>
+                    <p class="mb-0 text-muted small">${res.msg}</p>
+                </div>`;
+            if(!auth.currentUser.isAnonymous) {
+                push(ref(db, `users/${auth.currentUser.uid}/history`), { date: new Date().toLocaleString('th-TH'), title: res.title });
+            }
+        }, 1800);
+    };
+
+    // --- DATABASE SYNC ---
+    function syncData() {
+        if(auth.currentUser.isAnonymous) return;
+        onValue(ref(db, `users/${auth.currentUser.uid}/history`), (snap) => {
+            const data = snap.val();
+            const hList = document.getElementById('historyData'); hList.innerHTML = "";
+            if(data) {
+                Object.values(data).reverse().forEach(h => {
+                    hList.innerHTML += `<div class="p-3 mb-2 bg-white rounded-4 shadow-sm d-flex justify-content-between"><b>${h.title}</b><small class="text-muted">${h.date}</small></div>`;
+                });
+            } else { hList.innerHTML = "<p class='text-muted'>ยังไม่มีประวัติ</p>"; }
+        });
+    }
+</script>
+</body>
+</html>        .form-control-modern {
             background: rgba(255, 255, 255, 0.6);
             border: 2px solid transparent;
             border-radius: 16px;
